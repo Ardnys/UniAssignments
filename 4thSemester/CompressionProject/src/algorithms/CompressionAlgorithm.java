@@ -1,6 +1,8 @@
 package algorithms;
 
 public interface CompressionAlgorithm {
-    void compress();
-    void decompress();
+    byte[] compress(byte[] bytes);
+    byte[] decompress(byte[] bytes);
+
+    String getFileFormat();
 }
