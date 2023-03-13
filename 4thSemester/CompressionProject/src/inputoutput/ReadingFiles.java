@@ -1,8 +1,6 @@
 package inputoutput;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.stream.IntStream;
@@ -60,6 +58,29 @@ public class ReadingFiles {
     }
 
     public static void main(String[] args) {
+
+        byte[] bytes = new byte[10];
+        String s = "1010,123\n";
+        bytes = s.getBytes(StandardCharsets.UTF_8);
+
+        for (byte b: bytes) {
+            System.out.println(b);
+        }
+        System.out.println(new String(bytes, StandardCharsets.UTF_8));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //        BitSet bits = new BitSet(7);
 //        System.out.println(bitString(bits));
 //        bits.set(0, false);
@@ -75,20 +96,34 @@ public class ReadingFiles {
 //        System.out.println(bitString(bits));
 //        bits.clear(1);
 //        System.out.println(bitString(bits));
+//        System.out.println(bitString(stringToBit(s)));
+//
+//        BitSet bitSet = stringToBit(s); // your original BitSet object
+//        int desiredLength = s.length(); // the desired length, including leading zeroes
+//        BitSet paddedBitSet = new BitSet(desiredLength);
+//        int startIndex = desiredLength - bitSet.length();
+//        for (int i = 0; i < bitSet.length(); i++) {
+//            if (bitSet.get(i)) {
+//                paddedBitSet.set(startIndex + i);
+//            }
+//        }
+//        System.out.println(bitString(paddedBitSet));
 
-        String s = "0110100";
-        System.out.println(bitString(stringToBit(s)));
+//        String s = "01100100";
+        // assert s.length() % 8 == 0;
+//        byte[] bytes = new byte[s.length()/8];
+//        bytes[0] = (byte) Integer.parseInt(s.substring(0, 8), 2);
 
-        BitSet bitSet = stringToBit(s); // your original BitSet object
-        int desiredLength = s.length(); // the desired length, including leading zeroes
-        BitSet paddedBitSet = new BitSet(desiredLength);
-        int startIndex = desiredLength - bitSet.length();
-        for (int i = 0; i < bitSet.length(); i++) {
-            if (bitSet.get(i)) {
-                paddedBitSet.set(startIndex + i);
-            }
-        }
-        System.out.println(bitString(paddedBitSet));
+//        FileOutputStream output;
+//        try {
+//            output = new FileOutputStream("inttobytetest.txt", true);
+//            output.write(bytes);
+//            output.close();
+//        } catch (FileNotFoundException e) {
+//            System.err.printf("Can't find file %s", bytes);
+//        } catch (IOException e) {
+//            System.err.println("Error with writing to output file");
+//        }
 
 
     }
