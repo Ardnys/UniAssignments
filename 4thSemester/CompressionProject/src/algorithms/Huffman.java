@@ -1,24 +1,31 @@
 package algorithms;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Huffman implements CompressionAlgorithm {
-    PriorityQueue<HuffmanNode<Byte>> queue; // queue for sorted list
-
-    PriorityQueue<HuffmanNode<Byte>> firstQueue;
-    ArrayList<HuffmanNode<Byte>> freqArray = new ArrayList<>(); // list for char freqs
+    PriorityQueue<HuffmanNode> firstQueue;
+    PriorityQueue<HuffmanNode> decodingQueue;
+    ArrayList<HuffmanNode> freqArray = new ArrayList<>(); // list for char freqs
     Map<String, Byte> codingMap = new TreeMap<>();
 
+    int sz = 0;
 
-    File compressedFile;
+    String sourcePath = "readthis/test.txt";
+    String compressPath = "readthis/comp.txt";
+    String decompressPath = "readthis/decomp.txt";
+    File sourceFile = new File(sourcePath);
+    File compressedFile = new File(compressPath);
+    FileOutputStream outputStream;
+    ObjectOutputStream objOutStream;
+    FileInputStream inputStream;
+    FileInputStream decompressionInputStream;
+    ObjectInputStream objInStream;
     
     public Huffman() {
-        
+        // TODO get paths from constructor
+        initStream();
     }
 
     @Override
@@ -28,9 +35,11 @@ public class Huffman implements CompressionAlgorithm {
         
         codingTable();
         
-        createHeader();
+//        createHeader();
+        // header is created when writing to file
+        // TODO make the streams fields
         String body = createEncodedBody(bytes);
-
+        System.out.println(body);
         BitSet bits = strToBit(body);
 
 //        writeCompressedFile(bits, "readthis/comp.txt");
@@ -50,7 +59,7 @@ public class Huffman implements CompressionAlgorithm {
 
     public void getByteArr(byte[] bytes) {
         for (byte b: bytes) {
-            HuffmanNode<Byte> temp = new HuffmanNode<>(b ,1);
+            HuffmanNode temp = new HuffmanNode(b ,1);
             if (!freqArray.contains(temp)) {
                 freqArray.add(temp);
             }
@@ -58,83 +67,41 @@ public class Huffman implements CompressionAlgorithm {
                 freqArray.get(freqArray.indexOf(temp)).incrementFrequency();
             }
         }
-        queue = new PriorityQueue<>(freqArray.size()*2, new FreqComparator());
         firstQueue = new PriorityQueue<>(freqArray.size()*2, new FreqComparator());
         firstQueue.addAll(freqArray);
+        //System.out.println(firstQueue.size());
+        sz = firstQueue.size();
         construction();
     }
 
     public void construction() {
         // take the first two nodes and join them
         while (firstQueue.size() > 1) {
-            HuffmanNode<Byte> left = firstQueue.poll();
-            HuffmanNode<Byte> right = firstQueue.poll();
+            HuffmanNode left = firstQueue.poll();
+            HuffmanNode right = firstQueue.poll();
 
             assert right != null;
 
             // combine the frequency as a parent node of the left and right
-            HuffmanNode<Byte> parent = new HuffmanNode<>(null,left.getFrequency() + right.getFrequency(), left, right);
+            HuffmanNode parent = new HuffmanNode(null,left.getFrequency() + right.getFrequency(), left, right);
 
             firstQueue.add(parent);
         }
     }
 
     public void codingTable() {
-        /*
-        let's make it recursive
-        if node.data == null: // meaning parent node
-            fun(node.left, str.append('0')
-            fun(node.right, str.append('1')
-        else: // we hit a char
-            map.put(node.data, str)
-            return
-         */
         traverse(firstQueue.peek(), "");
     }
 
-    private void traverse(HuffmanNode<Byte> node, String code) {
+    private void traverse(HuffmanNode node, String code) {
         if (node.getData() == null) {
             traverse(node.getLeft(), code.concat("0"));
             traverse(node.getRight(), code.concat("1"));
         }
         else {
-            // encode the string as bits
-            // System.out.println("String code: " + code);
-
-//            BitSet bit = strToBit(code);
-//
-//            System.out.println("Bit code: " + bitString(bit));
             codingMap.put(code, node.getData());
         }
     }
-
-//    public ArrayList<HuffmanNode<Byte>> huffmanTreePreorder(HuffmanNode<Byte> node) {
-//        ArrayList<HuffmanNode<Byte>> array = new ArrayList<>(firstQueue.size());
-//        return preorder(node, array);
-//    }
-//
-//    private ArrayList<HuffmanNode<Byte>> preorder(HuffmanNode<Byte> node, ArrayList<HuffmanNode<Byte>> huffmanArray) {
-//        if (node == null) return huffmanArray;
-//        huffmanArray.add(node);
-//        huffmanArray = preorder(node.getLeft(), huffmanArray);
-//        huffmanArray = preorder(node.getRight(), huffmanArray);
-//        return huffmanArray;
-//    }
-//
-//    public ArrayList<HuffmanNode<Byte>> huffmanTreeInorder(HuffmanNode<Byte> node) {
-//        ArrayList<HuffmanNode<Byte>> array = new ArrayList<>(firstQueue.size());
-//        return inorder(node, array);
-//    }
-//
-//    private ArrayList<HuffmanNode<Byte>> inorder(HuffmanNode<Byte> node, ArrayList<HuffmanNode<Byte>> huffmanArray) {
-//        if (node == null) return huffmanArray;
-//        huffmanArray = inorder(node.getLeft(), huffmanArray);
-//        huffmanArray.add(node);
-//        huffmanArray = inorder(node.getRight(), huffmanArray);
-//        return huffmanArray;
-//    }
-
-
     public String createEncodedBody(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (Byte b: bytes) {
@@ -143,26 +110,6 @@ public class Huffman implements CompressionAlgorithm {
 
         // return sb.toString().getBytes(StandardCharsets.UTF_8);
         return sb.toString();
-    }
-
-    public void createHeader() {
-        // store the huffman tree here
-        // StringBuilder sb = new StringBuilder();
-
-        try {
-            FileOutputStream fos = new FileOutputStream("serialtest.txt");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.write(firstQueue.size()); // first write the number of elements in the priority queue
-
-            while (!firstQueue.isEmpty()) {
-                oos.writeObject(firstQueue.poll()); // write the element
-                oos.writeChar(','); // comma separate them
-            }
-
-        } catch (IOException e) {
-            System.out.println("Problem while writing header");
-            e.printStackTrace();
-        }
     }
 
     public String getKeyByValue(Byte value) {
@@ -177,7 +124,7 @@ public class Huffman implements CompressionAlgorithm {
     public BitSet strToBit(String str) {
         // str += "1"; // bits demand a sacrifice
         int strlen = str.length();
-        System.out.println(strlen);
+        // System.out.println(strlen);
         BitSet bits = new BitSet(strlen);
         int ctr = 0;
 
@@ -192,7 +139,7 @@ public class Huffman implements CompressionAlgorithm {
         }
         return bits;
     }
-    // TODO if the performance sucks return here
+    // TODO if the performance sucks return here. this makes BitSet
 //    private void traverse(HuffmanNode<Byte> node, BitSet code, int bitlen) {
 //        if (node.getData() == null) {
 //            code.set(bitlen, false);
@@ -216,27 +163,59 @@ public class Huffman implements CompressionAlgorithm {
 //        return zeros + binary;
 //    }
 
-     private String bitString(BitSet bits) {
-        int nbits = bits.length();
-        final StringBuilder buffer = new StringBuilder(nbits);
-        IntStream.range(0, nbits).mapToObj(i -> bits.get(i) ? '1' : '0').forEach(buffer::append);
-        return buffer.toString();
-    }
-
     public void printTable() {
         for (Map.Entry<String, Byte> e : codingMap.entrySet()) {
             System.out.println("key: " + e.getKey() + " value: " + e.getValue());
         }
     }
 
-
+    public byte[] renamethis() {
+        byte[] bytes = new byte[(int) sourceFile.length()];
+        try {
+            inputStream.read(bytes);
+            System.out.println("available bits after reading: " + inputStream.available());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while reading the source file");
+        }
+        return bytes;
+    }
+    
+    private void initStream() {
+        try {
+            outputStream = new FileOutputStream(compressedFile);
+            objOutStream = new ObjectOutputStream(outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while initialising the output streams");
+        }
+        
+        try {
+            inputStream = new FileInputStream(sourceFile);
+            System.out.println("initial available bits " + inputStream.available());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while initialising the input streams");
+        }
+    }
 
     public void writeCompressedFile(byte[] bytes, String pathname) {
 //        String s= new String(bytes, StandardCharsets.UTF_8);
 //        System.out.println(s);
-        File outputFile = new File(pathname);
-        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            outputStream.write(bytes);
+        firstQueue.clear();
+        firstQueue.addAll(freqArray);
+        try {
+            objOutStream.writeInt(sz);
+            // System.out.println("sz is: " + sz);
+            while (!firstQueue.isEmpty()) {
+                objOutStream.writeObject(firstQueue.poll()); // write the element
+            }
+
+            // writing the body for the compressed file
+            objOutStream.write(bytes);
+
+            objOutStream.close();
+            outputStream.close();
         }
         catch (IOException e) {
             System.out.println("Error while writing to compressed file");
@@ -254,122 +233,116 @@ public class Huffman implements CompressionAlgorithm {
     ----------------------------------------------------------------------
      */
 
-    public String readHeader(byte[] bytes) {
-        // read the header and call the thing to store the table
-        // pass the rest of the array to method that read the body
-
-
-
-        return null;
+    public void initForDecompression() {
+        try {
+            decompressionInputStream = new FileInputStream(compressedFile);
+            System.out.println("available bits for decompression " + decompressionInputStream.available());
+            objInStream = new ObjectInputStream(decompressionInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while init decompression stream");
+        }
     }
 
 
-    public static void main(String[] args) {
-        String text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut vitae felis in justo feugiat porta. " +
-                "Etiam justo ligula, bibendum quis blandit sit amet, aliquet et felis. Nulla consectetur ex mauris, vitae " +
-                "dictum nulla aliquet sit amet. Morbi facilisis augue sed est placerat gravida. Quisque placerat placerat " +
-                "justo tempor faucibus. Fusce scelerisque at mi sit amet laoreet. Pellentesque metus nulla, hendrerit id quam " +
-                "sit amet, condimentum congue nulla. Fusce congue vitae tortor tincidunt dictum. Pellentesque orci sem," +
-                " sodales feugiat vulputate non, aliquet et justo. Curabitur at sagittis quam. Sed quis arcu et massa posuere mattis.";
-
-        Huffman h = new Huffman();
-
-        File file = new File("readthis/lorem.txt");
-        byte[] bytes = new byte[(int) file.length()];
-
-        try(FileInputStream fis = new FileInputStream(file)) {
-            fis.read(bytes);
-
-            //System.out.println(new String(bytes, StandardCharsets.UTF_8));
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        byte[] compressedBytes = h.compress(bytes);
-        h.writeCompressedFile(compressedBytes, "readthis/comp.txt");
-
-        File compfile = new File("readthis/comp.txt");
-        //byte[] outbytes = new byte[(int) compfile.length()];
-
+    public void readHeader() {
+        // first read an integer from the stream.
         try {
-            byte [] fileBytes = Files.readAllBytes(compfile.toPath());
-            char singleChar;
-            for(byte b : fileBytes) {
-                singleChar = (char) b;
-                System.out.print(singleChar);
+            initForDecompression();
+             int treeLength = objInStream.readInt();
+
+//            System.out.println("tree length is: " + treeLength);
+
+            ArrayList<HuffmanNode> list = new ArrayList<>(treeLength);
+            Class<HuffmanNode> huffmanNodeClass = HuffmanNode.class;
+
+            // read the object
+
+            for (int i = 0; i < treeLength; i++) {
+                Object o = objInStream.readObject();
+                HuffmanNode node = huffmanNodeClass.cast(o);
+                list.add(node);
+                // System.out.println(node);
             }
 
+            decodingQueue = new PriorityQueue<>(new FreqComparator());
+            decodingQueue.addAll(list);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error while writing to decompressed file");
+        } catch (ClassNotFoundException ce) {
+            ce.printStackTrace();
+            System.out.println("what do you mean class not found");
         }
-        catch (IOException e) {
-            System.out.println("Error while reading file");
+    }
+
+    public byte[] readBytes() {
+        byte[] bytes = new byte[(int) compressedFile.length()];
+        try {
+            decompressionInputStream.read(bytes);
+            System.out.println("available bits after reading the compressed file: " + decompressionInputStream.available());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while reading the compressed file");
         }
+        return bytes;
+    }
 
-//        try(FileInputStream fis = new FileInputStream(compfile)) {
-//            fis.read(outbytes);
-//
-//            //System.out.println(new String(bytes, StandardCharsets.UTF_8));
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        h.writeCompressedFile(outbytes, "readthis/hmm.txt");
+    public BitSet bytesToBits(byte[] bytes) {
+        // convert byte array to BitSet
+        // i am just trying to undo what i did, hoping that it works lol
 
+        return BitSet.valueOf(bytes);
+    }
+    
+    public String bitsToBitsLOL(BitSet bits) {
+        int nbits = bits.length();
+        final StringBuilder buffer = new StringBuilder(nbits);
+        IntStream.range(0, nbits).mapToObj(i -> bits.get(i) ? '1' : '0').forEach(buffer::append);
+        return buffer.toString();
+    }
 
-
-        // h.getByteArr(bytes);
-
-//        while (!h.firstQueue.isEmpty()) {
-//            System.out.println(h.firstQueue.poll());
-//        }
-//        h.codingTable();
-//        h.printTable();
-//        String header = h.createHeader();
-//        //byte[] thembits = h.createEncodedBody(bytes);
-//        String boi = header + h.createEncodedBody(bytes);
-//        byte[] byteArray = boi.getBytes(StandardCharsets.UTF_8);
-//        BitSet bs = h.strToBit(boi);
-
-        // System.out.println(Arrays.toString(thembits);
-
-
-        // create directory and put the compressed file in it
-//        String compressedDirPath = file.getName()+"-compressed";
-//        File compressedDir = new File(compressedDirPath);
-//        boolean yes = compressedDir.mkdir();
-//        if (yes) {
-//            System.out.println("Folder created");
-//        } else {
-//            System.out.println("Error while creating a folder");
-//        }
+    public String reverseString(String str) {
+        StringBuilder sb = new StringBuilder(str);
+        return sb.reverse().toString();
+    }
+    public static void main(String[] args) {
+        Huffman h = new Huffman();
+        byte[] compressedBytes = h.compress(h.renamethis());
+        h.writeCompressedFile(compressedBytes, "readthis/comp.txt");
+        System.out.println("hold on to your buns, i am gonna read the compressed file");
+        h.readHeader();
+        String thembits = h.bitsToBitsLOL(h.bytesToBits(h.readBytes()));
+        System.out.println(h.reverseString(thembits));
     }
 }
 
-class FreqComparator implements Comparator<HuffmanNode<?>> {
+class FreqComparator implements Comparator<HuffmanNode> {
 
     @Override
-    public int compare(HuffmanNode<?> o1, HuffmanNode<?> o2) {
+    public int compare(HuffmanNode o1, HuffmanNode o2) {
         return o1.getFrequency() - o2.getFrequency();
     }
 }
 
-class HuffmanNode<T> implements Serializable {
+class HuffmanNode implements Serializable {
 
     // data is null for internal nodes
-    private T data;
+    private Byte data;
     private int frequency;
 
     // these are only for internal nodes
-    private HuffmanNode<T> left;
-    private HuffmanNode<T> right;
+    private HuffmanNode left;
+    private HuffmanNode right;
 
-    public HuffmanNode(T data, int frequency) {
+    public HuffmanNode(Byte data, int frequency) {
         this.data = data;
         this.frequency = frequency;
     }
 
-    public HuffmanNode(T data, int frequency, HuffmanNode<T> left, HuffmanNode<T> right) {
+    public HuffmanNode(Byte data, int frequency, HuffmanNode left, HuffmanNode right) {
         this.data = data;
         this.frequency = frequency;
         this.left = left;
@@ -387,7 +360,7 @@ class HuffmanNode<T> implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HuffmanNode<?> that = (HuffmanNode<?>) o;
+        HuffmanNode that = (HuffmanNode) o;
         return data.equals(that.data);
     }
 
@@ -398,8 +371,13 @@ class HuffmanNode<T> implements Serializable {
 
     @Override
     public String toString() {
-        return "data=" + data +
-                ", frequency=" + frequency + ", left=" + left.data + ", right="+right.data;
+        if (left == null || right == null) {
+            return "data=" + data + ", frequency=" + frequency;
+        }
+        else {
+            return "data=" + data +
+                    ", frequency=" + frequency + ", left=" + left.data + ", right="+right.data;
+        }
     }
 
     public void incrementFrequency() {
@@ -409,23 +387,23 @@ class HuffmanNode<T> implements Serializable {
     public void incrementFrequency(int num) {
         frequency += num;
     }
-    public HuffmanNode<T> getLeft() {
+    public HuffmanNode getLeft() {
         return left;
     }
 
-    public void setLeft(HuffmanNode<T> left) {
+    public void setLeft(HuffmanNode left) {
         this.left = left;
     }
 
-    public HuffmanNode<T> getRight() {
+    public HuffmanNode getRight() {
         return right;
     }
 
-    public void setRight(HuffmanNode<T> right) {
+    public void setRight(HuffmanNode right) {
         this.right = right;
     }
 
-    public T getData() {
+    public Byte getData() {
         return data;
     }
 
@@ -433,7 +411,7 @@ class HuffmanNode<T> implements Serializable {
         return frequency;
     }
 
-    public void setData(T data) {
+    public void setData(Byte data) {
         this.data = data;
     }
 
