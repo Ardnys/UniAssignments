@@ -64,7 +64,7 @@ public class FileChooserDemo2 extends JPanel
         log.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(log);
 
-        JButton sendButton = new JButton("Attach...");
+        JButton sendButton = new JButton("Choose File...");
         sendButton.addActionListener(this);
 
         add(sendButton, BorderLayout.PAGE_START);
@@ -74,7 +74,9 @@ public class FileChooserDemo2 extends JPanel
     public void actionPerformed(ActionEvent e) {
         //Set up the file chooser.
         if (fc == null) {
-            fc = new JFileChooser();
+            String rootPath = System.getProperty("user.dir");
+
+            fc = new JFileChooser(rootPath);
 
 	    //Add a custom file filter and disable the default
 	    //(Accept All) file filter.
@@ -90,7 +92,7 @@ public class FileChooserDemo2 extends JPanel
 
         //Show it.
         int returnVal = fc.showDialog(FileChooserDemo2.this,
-                                      "Attach");
+                                      "Choose");
 
         //Process the results.
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -121,6 +123,7 @@ public class FileChooserDemo2 extends JPanel
 
         //Display the window.
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 

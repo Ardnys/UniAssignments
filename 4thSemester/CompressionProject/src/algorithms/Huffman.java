@@ -15,6 +15,8 @@ public class Huffman implements CompressionAlgorithm {
 
     int sz = 0;
     public String encodedString;
+    int codeLength = 0;
+
 
     String sourcePath = "readthis/small.txt";
     String compressPath = "readthis/comp.txt";
@@ -75,9 +77,9 @@ public class Huffman implements CompressionAlgorithm {
             }
         }
 
-        for (HuffmanNode node : freqArray) {
-            System.out.println(node);
-        }
+//        for (HuffmanNode node : freqArray) {
+//            System.out.println(node);
+//        }
 
 
         firstQueue = new PriorityQueue<>(freqArray.size()*2, new FreqComparator());
@@ -139,14 +141,14 @@ public class Huffman implements CompressionAlgorithm {
 
     public BitSet strToBit(String str) {
         // str += "1"; // bits demand a sacrifice
-        int strlen = str.length();
         str = "1" + str + "1"; // i hate this soo much
+        codeLength = str.length();
         System.out.println(str);
         // System.out.println(strlen);
-        BitSet bits = new BitSet(strlen);
+        BitSet bits = new BitSet(codeLength);
         int ctr = 0;
 
-        for (int i = strlen-1; i >= 0 ; i--) {
+        for (int i = codeLength-1; i >= 0 ; i--) {
             char c = str.charAt(i);
             if (c == '0') {
                 bits.set(ctr++, false);
@@ -230,6 +232,9 @@ public class Huffman implements CompressionAlgorithm {
 //            }
             objOutStream.writeObject(codingMap);
 
+            // write the length of the compressed bit string
+            // objOutStream.writeInt(codeLength);
+
             // writing the body for the compressed file
             objOutStream.write(bytes);
             objOutStream.flush();
@@ -278,13 +283,14 @@ public class Huffman implements CompressionAlgorithm {
     }
 
 
-    public void readHeader() {
+    public int readHeader() {
         // first read an integer from the stream.
+        int bitlen = 0;
         try {
             initForDecompression();
 
             decodingMap = (Map<String, Byte>) objInStream.readObject();
-            System.out.println("map is " + decodingMap);
+            //System.out.println("map is " + decodingMap);
 
              //int treeLength = objInStream.readInt();
 
@@ -308,6 +314,8 @@ public class Huffman implements CompressionAlgorithm {
 //            for (HuffmanNode node : list) {
 //                System.out.println(node);
 //            }
+            // read the length of the encoded string
+            // bitlen = objInStream.readInt();
             System.out.println("-----------------------------------");
             System.out.println("Table");
             printTable();
@@ -322,6 +330,7 @@ public class Huffman implements CompressionAlgorithm {
             ce.printStackTrace();
             System.out.println("what do you mean class not found");
         }
+        return bitlen;
     }
 
     public byte[] readBytes() {
@@ -350,8 +359,10 @@ public class Huffman implements CompressionAlgorithm {
         return buffer.toString();
     }
 
-    public String reverseString(String str) {
+    public String reverseString(String str, int boi) {
         StringBuilder sb = new StringBuilder(str);
+//        sb.deleteCharAt(0);
+//        sb.deleteCharAt(str.length()-1);
         return sb.reverse().toString();
     }
 
@@ -414,12 +425,12 @@ public class Huffman implements CompressionAlgorithm {
         byte[] compressedBytes = h.compress(h.renamethis());
         h.writeCompressedFile(compressedBytes, "readthis/comp.txt");
         System.out.println("hold on to your buns, i am gonna read the compressed file");
-        h.readHeader();
+        int l = h.readHeader();
 //        System.out.println("encoding queue");
 //        h.inorder(h.secondQueue);
 //        System.out.println("decoding queue");
 //        h.inorder(h.decodingQueue);
-        String thembits =  h.reverseString(h.bitsToBitsLOL(h.bytesToBits(h.readBytes())));  // lol
+        String thembits =  h.reverseString(h.bitsToBitsLOL(h.bytesToBits(h.readBytes())), l-2);  // lol
         System.out.println(h.encodedString + "\nlen: " + h.encodedString.length());
         thembits = thembits.substring(1, thembits.length());
         System.out.println(thembits +"\nlen: " + thembits.length());

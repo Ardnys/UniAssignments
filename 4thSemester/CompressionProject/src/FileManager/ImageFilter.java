@@ -45,14 +45,10 @@ public class ImageFilter extends FileFilter {
 
         String extension = Utils.getExtension(f);
         if (extension != null) {
-            if (extension.equals(Utils.txt) ||
-                extension.equals(Utils.jpeg) ||
-                extension.equals(Utils.jpg) ||
-                extension.equals(Utils.png)) {
-                    return true;
-            } else {
-                return false;
-            }
+            return extension.equals(Utils.txt) ||
+                    extension.equals(Utils.jpeg) ||
+                    extension.equals(Utils.jpg) ||
+                    extension.equals(Utils.png);
         }
 
         return false;
