@@ -41,6 +41,8 @@ public class ImageFileView extends FileView {
     ImageIcon gifIcon = Utils.createImageIcon("images/gifIcon.gif");
     ImageIcon tiffIcon = Utils.createImageIcon("images/tiffIcon.gif");
     ImageIcon pngIcon = Utils.createImageIcon("images/pngIcon.png");
+    ImageIcon txtIcon = Utils.createImageIcon("images/fileicon32.jpg");
+    ImageIcon folderIcon = Utils.createImageIcon("images/foldericon32.jpg");
 
     public String getName(File f) {
         return null; //let the L&F FileView figure this out
@@ -82,9 +84,11 @@ public class ImageFileView extends FileView {
                 extension.equals(Utils.jpg)) {
                 icon = jpgIcon;
             } else if (extension.equals(Utils.txt)) {
-                icon = gifIcon; //TODO text file icon here
+                icon = txtIcon; //TODO text file icon here
             } else if (extension.equals(Utils.png)) {
                 icon = pngIcon;
+            } else if (f.isDirectory()) {
+                icon = folderIcon;
             }
         }
         return icon;

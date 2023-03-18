@@ -48,27 +48,89 @@ import javax.swing.SwingUtilities;
  *   images/tiffIcon.gif (required by ImageFileView.java)
  *   images/pngIcon.png (required by ImageFileView.java)
  */
-public class FileChooserDemo2 extends JPanel
+public class CompressionGUI extends JPanel
                               implements ActionListener {
     static private String newline = "\n";
     private JTextArea log;
     private JFileChooser fc;
 
-    public FileChooserDemo2() {
-        super(new BorderLayout());
+    public CompressionGUI() {
+        super(new GridLayout(3,3));
 
-        //Create the log first, because the action listener
-        //needs to refer to it.
+        JButton huffmanCompressButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                System.out.println("huffman compressed");
+                log.append("initiate huffman compression\n");
+                // TODO calls huffman compression
+            }
+        });
+        JButton lzwCompressionButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                System.out.println("lzw compressed");
+                log.append("initiate lzw compression\n");
+                // TODO calls lzw compression
+            }
+        });
+        JButton huffmanDecompressButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                System.out.println("huffman decompressed");
+                log.append("initiate huffman decompression\n");
+                // TODO calls huffman decompression
+            }
+        });
+        JButton lzwDecompressButton = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                System.out.println("lzw decompressed");
+                log.append("initiate lzw decompression\n");
+                // TODO calls lzw decompression
+            }
+        });
+
+        JButton chooseFileButton = new JButton("Choose file for compression");
+        chooseFileButton.addActionListener(this);
+
+        huffmanCompressButton.setText("Huffman Compression");
+        huffmanDecompressButton.setText("Huffman Decompression");
+        lzwCompressionButton.setText("LZW Compression");
+        lzwDecompressButton.setText("LZW Decompression");
+        // chooseFileButton.setText("Choose File for Compression");
+
+//        JLabel fileLabel = new JLabel("File to be compressed");
+//        JLabel compressedLabel = new JLabel("Compressed file");
+
         log = new JTextArea(5,20);
         log.setMargin(new Insets(5,5,5,5));
         log.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(log);
 
-        JButton sendButton = new JButton("Choose File...");
-        sendButton.addActionListener(this);
+        add(huffmanCompressButton);
+        add(lzwCompressionButton);
+        add(huffmanDecompressButton);
+        add(lzwDecompressButton);
+        add(logScrollPane);
+//        add(fileLabel);
+//        add(compressedLabel);
+        add(chooseFileButton);
 
-        add(sendButton, BorderLayout.PAGE_START);
-        add(logScrollPane, BorderLayout.CENTER);
+        // below is the code from docs
+        //        super(new BorderLayout());
+
+        //Create the log first, because the action listener
+        //needs to refer to it.
+//        log = new JTextArea(5,20);
+//        log.setMargin(new Insets(5,5,5,5));
+//        log.setEditable(false);
+//        JScrollPane logScrollPane = new JScrollPane(log);
+
+//        JButton sendButton = new JButton("Choose File...");
+//        sendButton.addActionListener(this);
+//
+//        add(sendButton, BorderLayout.PAGE_START);
+//        add(logScrollPane, BorderLayout.CENTER);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -91,7 +153,7 @@ public class FileChooserDemo2 extends JPanel
         }
 
         //Show it.
-        int returnVal = fc.showDialog(FileChooserDemo2.this,
+        int returnVal = fc.showDialog(CompressionGUI.this,
                                       "Choose");
 
         //Process the results.
@@ -119,7 +181,7 @@ public class FileChooserDemo2 extends JPanel
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Add content to the window.
-        frame.add(new FileChooserDemo2());
+        frame.add(new CompressionGUI());
 
         //Display the window.
         frame.pack();

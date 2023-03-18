@@ -9,7 +9,7 @@ public class Huffman implements CompressionAlgorithm {
     PriorityQueue<HuffmanNode> secondQueue;
     PriorityQueue<HuffmanNode> decodingQueue;
     ArrayList<HuffmanNode> freqArray = new ArrayList<>(); // list for char freqs
-    Map<String, Byte> codingMap = new TreeMap<>();
+    Map<String, Byte> codingMap = new HashMap<>();
 
     Map<String, Byte> decodingMap;
 
@@ -18,8 +18,8 @@ public class Huffman implements CompressionAlgorithm {
     int codeLength = 0;
 
 
-    String sourcePath = "readthis/small.txt";
-    String compressPath = "readthis/comp.txt";
+    String sourcePath = "readthis/lorem.txt";
+    String compressPath = sourcePath + ".hf";
     String decompressPath = "readthis/decomp.txt";
     File sourceFile = new File(sourcePath);
     File compressedFile = new File(compressPath);
@@ -45,9 +45,8 @@ public class Huffman implements CompressionAlgorithm {
         
 //        createHeader();
         // header is created when writing to file
-        // TODO make the streams fields
         String body = createEncodedBody(bytes);
-        System.out.println(" "+body);
+        //System.out.println(" "+body);
         encodedString = body;
         BitSet bits = strToBit(body);
 
@@ -58,7 +57,24 @@ public class Huffman implements CompressionAlgorithm {
     
     @Override
     public byte[] decompress(byte[] bytes) {
-        return new byte[0];
+        // first read the header
+        int l = readHeader();
+
+        // read bytes, convert it to BitSet, convert it to binary String and reverse it
+
+        String thembits =  reverseString(bitsToBitsLOL(bytesToBits(readBytes(l))));  // lol
+        //System.out.println(encodedString + "\nlen: " + encodedString.length());
+
+        // substring it to remove padding
+        thembits = thembits.substring(1, l);
+//        System.out.println(thembits +"\nlen: " + (l));
+        // thembits.substring(0, thembits.length()-40)
+
+        // decompress and write it to file
+        // byte[] decompressedBytes = actualDecompression(thembits);
+        // writeDecodedBytes(actualDecompression(thembits));
+
+        return actualDecompression(thembits);
     }
 
     @Override
@@ -76,6 +92,7 @@ public class Huffman implements CompressionAlgorithm {
                 freqArray.get(freqArray.indexOf(temp)).incrementFrequency();
             }
         }
+        System.out.println(bytes.length);
 
 //        for (HuffmanNode node : freqArray) {
 //            System.out.println(node);
@@ -143,7 +160,7 @@ public class Huffman implements CompressionAlgorithm {
         // str += "1"; // bits demand a sacrifice
         str = "1" + str + "1"; // i hate this soo much
         codeLength = str.length();
-        System.out.println(str);
+        System.out.println(codeLength);
         // System.out.println(strlen);
         BitSet bits = new BitSet(codeLength);
         int ctr = 0;
@@ -193,7 +210,7 @@ public class Huffman implements CompressionAlgorithm {
         byte[] bytes = new byte[(int) sourceFile.length()];
         try {
             inputStream.read(bytes);
-            System.out.println("available bits after reading: " + inputStream.available());
+            //System.out.println("available bits after reading: " + inputStream.available());
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("error while reading the source file");
@@ -230,10 +247,12 @@ public class Huffman implements CompressionAlgorithm {
 //            while (!firstQueue.isEmpty()) {
 //                objOutStream.writeObject(firstQueue.poll()); // write the element
 //            }
-            objOutStream.writeObject(codingMap);
 
-            // write the length of the compressed bit string
-            // objOutStream.writeInt(codeLength);
+//             write the length of the compressed bit string
+
+            objOutStream.writeInt(codeLength);
+
+            objOutStream.writeObject(codingMap);
 
             // writing the body for the compressed file
             objOutStream.write(bytes);
@@ -246,6 +265,7 @@ public class Huffman implements CompressionAlgorithm {
             System.out.println("Error while writing to compressed file");
             e.printStackTrace();
         }
+
     }
 
     public void inorder(PriorityQueue<HuffmanNode> qu) {
@@ -273,7 +293,7 @@ public class Huffman implements CompressionAlgorithm {
     public void initForDecompression() {
         try {
             decompressionInputStream = new FileInputStream(compressedFile);
-            System.out.println("available bits for decompression " + decompressionInputStream.available());
+            //System.out.println("available bits for decompression " + decompressionInputStream.available());
             objInStream = new ObjectInputStream(decompressionInputStream);
             decompressionOutputStream = new FileOutputStream(decompressedFile);
         } catch (IOException e) {
@@ -288,6 +308,8 @@ public class Huffman implements CompressionAlgorithm {
         int bitlen = 0;
         try {
             initForDecompression();
+
+            bitlen = objInStream.readInt();
 
             decodingMap = (Map<String, Byte>) objInStream.readObject();
             //System.out.println("map is " + decodingMap);
@@ -316,9 +338,9 @@ public class Huffman implements CompressionAlgorithm {
 //            }
             // read the length of the encoded string
             // bitlen = objInStream.readInt();
-            System.out.println("-----------------------------------");
-            System.out.println("Table");
-            printTable();
+//            System.out.println("-----------------------------------");
+//            System.out.println("Table");
+            //printTable();
 //            System.out.println("list size: " + list.size());
 //            System.out.println("queue size: " + decodingQueue.size());
 
@@ -333,11 +355,11 @@ public class Huffman implements CompressionAlgorithm {
         return bitlen;
     }
 
-    public byte[] readBytes() {
-        byte[] bytes = new byte[(int) compressedFile.length()];
+    public byte[] readBytes(int codeLength) {
+        byte[] bytes = new byte[codeLength];
         try {
             decompressionInputStream.read(bytes);
-            System.out.println("available bits after reading the compressed file: " + decompressionInputStream.available());
+            //System.out.println("available bits after reading the compressed file: " + decompressionInputStream.available());
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("error while reading the compressed file");
@@ -354,12 +376,13 @@ public class Huffman implements CompressionAlgorithm {
     
     public String bitsToBitsLOL(BitSet bits) {
         int nbits = bits.length();
+        System.out.println("decoded bit len: " + nbits);
         final StringBuilder buffer = new StringBuilder(nbits);
         IntStream.range(0, nbits).mapToObj(i -> bits.get(i) ? '1' : '0').forEach(buffer::append);
         return buffer.toString();
     }
 
-    public String reverseString(String str, int boi) {
+    public String reverseString(String str) {
         StringBuilder sb = new StringBuilder(str);
 //        sb.deleteCharAt(0);
 //        sb.deleteCharAt(str.length()-1);
@@ -372,10 +395,10 @@ public class Huffman implements CompressionAlgorithm {
         // char[] encodedCharArray = encodedBinaryString.toCharArray();
          int ctr = 0;
         String code = "";
-        for (int i = 1; i < encodedBinaryString.length()-14; i++) { // TODO make this to subtract from the next multiple of 8 i guess
+        for (int i = 0; i < encodedBinaryString.length(); i++) {
             if (decodingMap.containsKey(code)) {
                 // write the value and reset the string
-                System.out.println("key: " + code + " value: " + decodingMap.get(code));
+                //System.out.println("key: " + code + " value: " + decodingMap.get(code));
                 bytes[ctr++] = decodingMap.get(code);
                 code = "";
             }
@@ -406,11 +429,17 @@ public class Huffman implements CompressionAlgorithm {
 //                code = "";
 //            }
 //        }
-        return bytes;
+        System.out.println(ctr);
+        byte[] bytesToWrite = new byte[ctr];
+        for (int i = 0; i < ctr; i++) {
+            bytesToWrite[i] = bytes[i];
+        }
+        return bytesToWrite;
     }
 
     public void writeDecodedBytes(byte[] bytes) {
         try {
+            System.out.println("written length: " + bytes.length);
             decompressionOutputStream.write(bytes);
             decompressionOutputStream.flush();
             decompressionOutputStream.close();
@@ -425,18 +454,13 @@ public class Huffman implements CompressionAlgorithm {
         byte[] compressedBytes = h.compress(h.renamethis());
         h.writeCompressedFile(compressedBytes, "readthis/comp.txt");
         System.out.println("hold on to your buns, i am gonna read the compressed file");
-        int l = h.readHeader();
+        h.writeDecodedBytes(h.decompress(compressedBytes));
+
 //        System.out.println("encoding queue");
 //        h.inorder(h.secondQueue);
 //        System.out.println("decoding queue");
 //        h.inorder(h.decodingQueue);
-        String thembits =  h.reverseString(h.bitsToBitsLOL(h.bytesToBits(h.readBytes())), l-2);  // lol
-        System.out.println(h.encodedString + "\nlen: " + h.encodedString.length());
-        thembits = thembits.substring(1, thembits.length());
-        System.out.println(thembits +"\nlen: " + thembits.length());
-        // thembits.substring(0, thembits.length()-40)
 
-        h.writeDecodedBytes(h.actualDecompression(thembits));
     }
 }
 
