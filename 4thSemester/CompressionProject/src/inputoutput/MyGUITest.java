@@ -4,9 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class CompressionGUI extends JPanel {
+public class MyGUITest extends JPanel {
 
-    public CompressionGUI() {
+    public MyGUITest() {
         super(new GridLayout(3, 3));
 
         /*
@@ -75,7 +75,7 @@ public class CompressionGUI extends JPanel {
         JFrame frame = new JFrame();
 
 
-        frame.add(new CompressionGUI(), BorderLayout.CENTER);
+        frame.add(new MyGUITest(), BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Sketchy Compressor");
         frame.pack();
