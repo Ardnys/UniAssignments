@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LZW implements CompressionAlgorithm {
 
@@ -40,15 +42,31 @@ public class LZW implements CompressionAlgorithm {
     @Override
     public byte[] compress(byte[] bytes) {
         String s = byteToString(bytes);
+//        s = s.replace("\r", ""); // i hate this lol
+//        s = s.replace("’", "'");
+//        s = s.replace("—", "-");
+//        s = s.replace("‘", "'");
+//        s = s.replace("“", "\"");
+//        s = s.replace("”", "\"");
+//        s = s.replace("œ", "oe"); // œ
 
+        // String str = "This is a string with [some] special + characters \\ that need to be escaped.";
+//        String escaped = escapeString(s);
+//        System.out.println(escaped);
         System.out.println(s);
+
+        // System.out.println(escapeString(s));
+        System.out.println("length of bytes: "+bytes.length);
 
         ArrayList<Integer> list = lzwEncode(s);
 
         short[] shortArr = listToShort(list);
 
+        writeShorts(shortArr);
+         encodedString = list.toString();
+
 //        printMap();
-        writeToFile(encodedString.getBytes(StandardCharsets.UTF_8));
+//         writeToFile(encodedString.getBytes(StandardCharsets.UTF_8));
 
 
         return new byte[0];
@@ -126,33 +144,51 @@ public class LZW implements CompressionAlgorithm {
     }
 
     private ArrayList<Integer> lzwEncode(String s) {
-        ArrayList<Integer> outList = new ArrayList<>();
+        ArrayList<Integer> outList = new ArrayList<>(150);
         int code = 256;
+        boolean uh = false;
         StringBuilder currentString = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
+            if ((int)(s.charAt(i)) > 256) {
+                continue;
+            }
             currentString.append(s.charAt(i));
             String realString = currentString.toString();
             if (!codingMap.containsKey(realString)) {
                 codingMap.put(realString, code++); // add it to map
                 outList.add(codingMap.get(realString.substring(0, realString.length()-1))); // output the code
+//                if (outList.size() > 1063 && outList.size() < 2000)
+//                    System.out.println("added index " + outList.size() +  " string: " + realString.substring(0, realString.length()-1)
+//                            + " code: " + codingMap.get(realString.substring(0, realString.length()-1)) +
+//                            "add returns: " + uh);
+                //System.out.println(realString);
                 currentString.delete(0, currentString.length()-1); // set current string
             }
         }
         outList.add(codingMap.get(currentString.toString()));
-        System.out.println("uncompressed: " + s);
-        System.out.println("======================\ncompressed");
-        for (Integer i : outList) {
-            System.out.println(i);
-        }
+//        System.out.println("uncompressed: " + s);
+//        System.out.println("======================\ncompressed");
+//        for (Integer i : outList) {
+//            System.out.println(i);
+//        }
         return outList;
     }
 
     private short[] listToShort(ArrayList<Integer> arr) {
         int ctr = 0;
         short[] sharr = new short[arr.size()];
-        for (int i : arr) {
-            short s = (short) i;
-            sharr[ctr++] = s;
+        try {
+            for (int i : arr) {
+                if (ctr == 105) {
+                    System.out.println("hold on");
+                }
+                short s = (short) i;
+                sharr[ctr++] = s;
+            }
+            return sharr;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            System.out.println("exception at " + ctr);
         }
         return sharr;
     }
@@ -160,11 +196,22 @@ public class LZW implements CompressionAlgorithm {
     private void writeToFile(byte[] bytes) {
         try {
             outputStream.write(bytes);
-            outputStream.flush();
-            outputStream.close();
+//            outputStream.flush();
+//            outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Something went wrong while writing compressed fiel");
+        }
+    }
+
+    private void writeShorts(short[] nope) {
+        try (DataOutputStream dos = new DataOutputStream(outputStream)) {
+            for (short code: nope) {
+                dos.writeShort(code);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("problem while writing shorts");
         }
     }
 
@@ -174,5 +221,30 @@ public class LZW implements CompressionAlgorithm {
         l.compress(l.readFile());
         System.out.println("END OF PROGRAM");
     }
+
+    public String escapeString(String s) {
+        // define the characters that need to be escaped
+        String specialChars = "\\[]*+-?.,|^$&";
+
+        // replace each special character with its escape sequence
+        StringBuilder sb = new StringBuilder();
+        Pattern p = Pattern.compile("([" + specialChars + "\"])");
+        Matcher m = p.matcher(s);
+        while (m.find()) {
+            String matched = m.group(1);
+            if (matched.equals("\\")) {
+                m.appendReplacement(sb, "\\\\\\\\");
+            } else {
+                m.appendReplacement(sb, "\\\\" + matched);
+            }
+        }
+        m.appendTail(sb);
+
+        // escape the single and double quotes
+        sb = new StringBuilder(sb.toString().replace("'", "\\'").replace("\"", "\\\""));
+
+        return sb.toString();
+    }
+
 
 }
