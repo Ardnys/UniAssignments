@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package FileManager;
+package Compressor;
 
 import java.io.File;
 import javax.swing.ImageIcon;

@@ -1,4 +1,4 @@
-package algorithms;
+package Compressor;
 
 public interface CompressionAlgorithm {
     byte[] compress(byte[] bytes);

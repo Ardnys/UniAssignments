@@ -1,10 +1,110 @@
-package algorithms;
+package Compressor;
 
 import java.io.*;
 import java.util.*;
 import java.util.stream.IntStream;
 
 public class Huffman implements CompressionAlgorithm {
+    class HuffmanNode implements Serializable {
+
+        // data is null for internal nodes
+        private Byte data;
+        private int frequency;
+
+        // these are only for internal nodes
+        private HuffmanNode left;
+        private HuffmanNode right;
+
+        public HuffmanNode(Byte data, int frequency) {
+            this.data = data;
+            this.frequency = frequency;
+        }
+
+        public HuffmanNode(Byte data, int frequency, HuffmanNode left, HuffmanNode right) {
+            this.data = data;
+            this.frequency = frequency;
+            this.left = left;
+            this.right = right;
+        }
+
+        // default constructor. don't use it
+        public HuffmanNode() {
+            this.data = null;
+            this.frequency = 0;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            HuffmanNode that = (HuffmanNode) o;
+            return data.equals(that.data);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(data);
+        }
+
+        @Override
+        public String toString() {
+            if (left == null || right == null) {
+                return "data=" + data + ", frequency=" + frequency;
+            }
+            else {
+                return "data=" + data +
+                        ", frequency=" + frequency + ", left=" + left.data + ", right="+right.data;
+            }
+        }
+
+        public void incrementFrequency() {
+            frequency++;
+        }
+
+        public void incrementFrequency(int num) {
+            frequency += num;
+        }
+        public HuffmanNode getLeft() {
+            return left;
+        }
+
+        public void setLeft(HuffmanNode left) {
+            this.left = left;
+        }
+
+        public HuffmanNode getRight() {
+            return right;
+        }
+
+        public void setRight(HuffmanNode right) {
+            this.right = right;
+        }
+
+        public Byte getData() {
+            return data;
+        }
+
+        public int getFrequency() {
+            return frequency;
+        }
+
+        public void setData(Byte data) {
+            this.data = data;
+        }
+
+        public void setFrequency(int frequency) {
+            this.frequency = frequency;
+        }
+    }
+
+    class FreqComparator implements Comparator<HuffmanNode> {
+
+        @Override
+        public int compare(HuffmanNode o1, HuffmanNode o2) {
+            return o1.getFrequency() - o2.getFrequency();
+        }
+    }
     PriorityQueue<HuffmanNode> firstQueue;
     PriorityQueue<HuffmanNode> secondQueue;
     PriorityQueue<HuffmanNode> decodingQueue;
@@ -464,103 +564,5 @@ public class Huffman implements CompressionAlgorithm {
     }
 }
 
-class FreqComparator implements Comparator<HuffmanNode> {
-
-    @Override
-    public int compare(HuffmanNode o1, HuffmanNode o2) {
-        return o1.getFrequency() - o2.getFrequency();
-    }
-}
-
-class HuffmanNode implements Serializable {
-
-    // data is null for internal nodes
-    private Byte data;
-    private int frequency;
-
-    // these are only for internal nodes
-    private HuffmanNode left;
-    private HuffmanNode right;
-
-    public HuffmanNode(Byte data, int frequency) {
-        this.data = data;
-        this.frequency = frequency;
-    }
-
-    public HuffmanNode(Byte data, int frequency, HuffmanNode left, HuffmanNode right) {
-        this.data = data;
-        this.frequency = frequency;
-        this.left = left;
-        this.right = right;
-    }
-
-    // default constructor. don't use it
-    public HuffmanNode() {
-        this.data = null;
-        this.frequency = 0;
-    }
 
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HuffmanNode that = (HuffmanNode) o;
-        return data.equals(that.data);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(data);
-    }
-
-    @Override
-    public String toString() {
-        if (left == null || right == null) {
-            return "data=" + data + ", frequency=" + frequency;
-        }
-        else {
-            return "data=" + data +
-                    ", frequency=" + frequency + ", left=" + left.data + ", right="+right.data;
-        }
-    }
-
-    public void incrementFrequency() {
-        frequency++;
-    }
-
-    public void incrementFrequency(int num) {
-        frequency += num;
-    }
-    public HuffmanNode getLeft() {
-        return left;
-    }
-
-    public void setLeft(HuffmanNode left) {
-        this.left = left;
-    }
-
-    public HuffmanNode getRight() {
-        return right;
-    }
-
-    public void setRight(HuffmanNode right) {
-        this.right = right;
-    }
-
-    public Byte getData() {
-        return data;
-    }
-
-    public int getFrequency() {
-        return frequency;
-    }
-
-    public void setData(Byte data) {
-        this.data = data;
-    }
-
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
-    }
-}
