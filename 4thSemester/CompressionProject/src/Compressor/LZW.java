@@ -1,6 +1,9 @@
 package Compressor;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -12,7 +15,9 @@ import java.util.regex.Pattern;
 public class LZW implements CompressionAlgorithm {
 
     Map<String, Integer> codingMap = new HashMap<>();
+    Map<Integer, String> decodingMap = new HashMap<>();
     String encodedString;
+    String decodedString;
 
     String sourcePath = "readthis/lzwtest.txt";
 //    String compressPath = sourcePath + ".hf";
@@ -30,9 +35,14 @@ public class LZW implements CompressionAlgorithm {
 
     public LZW(String sourcePath) {
 //        this.sourcePath = sourcePath;
-        initStream();
+        initEncodingStream();
         // initialise the map with one length values
-        initMap();
+        initEncodingMap();
+
+
+        // these will be on another class later
+        initDecodingStream();
+        initDecodingMap();
 
         //printMap();
     }
@@ -73,6 +83,8 @@ public class LZW implements CompressionAlgorithm {
 
     @Override
     public byte[] decompress(byte[] bytes) {
+        ArrayList<Integer> list = bytesToList(bytes);
+        lzwDecode(list);
         return new byte[0];
     }
 
@@ -81,13 +93,13 @@ public class LZW implements CompressionAlgorithm {
         return null;
     }
 
-    private void initStream() {
+    private void initEncodingStream() {
         try {
             outputStream = new FileOutputStream(compressedFile);
             objOutStream = new ObjectOutputStream(outputStream);
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("error while initialising the output streams");
+            System.out.println("error while initialising the compression output streams");
         }
 
         try {
@@ -95,13 +107,35 @@ public class LZW implements CompressionAlgorithm {
             // System.out.println("initial available bits " + inputStream.available());
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("error while initialising the input streams");
+            System.out.println("error while initialising the compression input streams");
         }
     }
 
-    private void initMap() {
+    private void initEncodingMap() {
         for (int i = 0; i < 256; i++) {
             codingMap.put(String.valueOf((char)i), i);
+        }
+    }
+
+    private void initDecodingStream() {
+        try {
+            decompressionOutputStream = new FileOutputStream(decompressedFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while initialising the decompression output stream");
+        }
+        try {
+            decompressionInputStream = new FileInputStream(compressedFile);
+            objInStream = new ObjectInputStream(decompressionInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error while initialising the decompression input streams");
+        }
+    }
+
+    private void initDecodingMap() {
+        for (int i = 0; i < 256; i++) {
+            decodingMap.put(i, String.valueOf((char)i));
         }
     }
 
@@ -111,9 +145,9 @@ public class LZW implements CompressionAlgorithm {
         }
     }
 
-    private byte[] readFile() { // this emulates the thing that sends bytes to compress method
+    private byte[] readFile(String path) { // this emulates the thing that sends bytes to compress method
         try {
-            return Files.readAllBytes(Paths.get(sourcePath));
+            return Files.readAllBytes(Paths.get(path));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,7 +179,6 @@ public class LZW implements CompressionAlgorithm {
     private ArrayList<Integer> lzwEncode(String s) {
         ArrayList<Integer> outList = new ArrayList<>(150);
         int code = 256;
-        boolean uh = false;
         StringBuilder currentString = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if ((int)(s.charAt(i)) > 256) {
@@ -192,20 +225,21 @@ public class LZW implements CompressionAlgorithm {
         return sharr;
     }
 
-    private void writeToFile(byte[] bytes) {
-        try {
-            outputStream.write(bytes);
+//    private void writeToFile(byte[] bytes) {
+//        try {
+//            outputStream.write(bytes);
 //            outputStream.flush();
 //            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Something went wrong while writing compressed fiel");
-        }
-    }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.out.println("Something went wrong while writing compressed fiel");
+//        }
+//    }
 
     private void writeShorts(short[] nope) {
         try (DataOutputStream dos = new DataOutputStream(outputStream)) {
             for (short code: nope) {
+                System.out.println(code);
                 dos.writeShort(code);
             }
         } catch (IOException e) {
@@ -214,36 +248,101 @@ public class LZW implements CompressionAlgorithm {
         }
     }
 
+    /*
+    ----------------------------------------------------------------------
+    |                                                                    |
+    |                                                                    |
+    |             D  E  C  O  M  P  R  E  S  S  I  O  N                  |
+    |                                                                    |
+    |                                                                    |
+    ----------------------------------------------------------------------
+     */
+
+    private ArrayList<Integer> bytesToList(byte[] bytes) {
+        ArrayList<Integer> list = new ArrayList<>();
+        byte[] pls = new byte[bytes.length-4];
+        int ctr = 0;
+        for (int i = 4; i < bytes.length; i++) {
+            pls[ctr++] = bytes[i];
+        }
+        ByteBuffer bb = ByteBuffer.wrap(pls);
+        bb.order(ByteOrder.BIG_ENDIAN); // set the byte order to little-endian
+        while (bb.remaining() >= 2) {
+            short value = bb.getShort();
+//            if (value >= 0 && value < 256)
+                list.add((int) value);
+        }
+        return list;
+    }
+
+
+    private void lzwDecode(ArrayList<Integer> list) {
+        int old = list.get(0); // TODO fix this hopefully understand too
+        int sym = 0;
+        int next = 256;
+        StringBuilder sb = new StringBuilder();
+        sb.append(decodingMap.get(old));
+        String s = "";
+        s = s+decodingMap.get(old);
+        StringBuilder prev = new StringBuilder();
+        prev.append(s.charAt(0));
+        //System.out.print(s);
+        for (int i = 0; i < list.size()-1; i++) {
+            sym = list.get(i+1);
+            if (!decodingMap.containsKey(sym)) {
+                sb.delete(0, sb.length());
+                sb.append(decodingMap.get(old));
+                sb.append(prev);
+
+            } else {
+                sb.append(decodingMap.get(sym));
+            }
+            System.out.print(sb);
+            prev.delete(0, prev.length());
+            prev.append(sb.charAt(0));
+            String uh = decodingMap.get(old) + prev;
+            decodingMap.put(next, uh);
+            next++;
+            old = sym;
+        }
+
+    }
+
     public static void main(String[] args) {
         LZW l = new LZW("readthis/lzw.txt");
 
-        l.compress(l.readFile());
-        System.out.println("END OF PROGRAM");
+        l.compress(l.readFile(l.sourcePath));
+
+        l.decompress(l.readFile(l.compressPath));
+
+
+
+        System.out.println("\nEND OF PROGRAM");
     }
 
-    public String escapeString(String s) {
-        // define the characters that need to be escaped
-        String specialChars = "\\[]*+-?.,|^$&";
-
-        // replace each special character with its escape sequence
-        StringBuilder sb = new StringBuilder();
-        Pattern p = Pattern.compile("([" + specialChars + "\"])");
-        Matcher m = p.matcher(s);
-        while (m.find()) {
-            String matched = m.group(1);
-            if (matched.equals("\\")) {
-                m.appendReplacement(sb, "\\\\\\\\");
-            } else {
-                m.appendReplacement(sb, "\\\\" + matched);
-            }
-        }
-        m.appendTail(sb);
-
-        // escape the single and double quotes
-        sb = new StringBuilder(sb.toString().replace("'", "\\'").replace("\"", "\\\""));
-
-        return sb.toString();
-    }
+//    public String escapeString(String s) {
+//        // define the characters that need to be escaped
+//        String specialChars = "\\[]*+-?.,|^$&";
+//
+//        // replace each special character with its escape sequence
+//        StringBuilder sb = new StringBuilder();
+//        Pattern p = Pattern.compile("([" + specialChars + "\"])");
+//        Matcher m = p.matcher(s);
+//        while (m.find()) {
+//            String matched = m.group(1);
+//            if (matched.equals("\\")) {
+//                m.appendReplacement(sb, "\\\\\\\\");
+//            } else {
+//                m.appendReplacement(sb, "\\\\" + matched);
+//            }
+//        }
+//        m.appendTail(sb);
+//
+//        // escape the single and double quotes
+//        sb = new StringBuilder(sb.toString().replace("'", "\\'").replace("\"", "\\\""));
+//
+//        return sb.toString();
+//    }
 
 
 }

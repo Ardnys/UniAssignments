@@ -36,6 +36,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.ColorChooserUI;
+import javax.swing.plaf.metal.MetalToggleButtonUI;
 
 /*
  * FileChooserDemo2.java requires these files:
@@ -49,54 +51,62 @@ import javax.swing.SwingUtilities;
  *   images/pngIcon.png (required by ImageFileView.java)
  */
 public class CompressionGUI extends JPanel
-                              implements ActionListener {
+                              implements ActionListener, ItemListener {
     static private String newline = "\n";
     private JTextArea log;
     private JFileChooser fc;
+    private File file;
+    private CompressionAlgorithm algorithm;
+    private Huffman huffmanAlgorithm;
+    private LZW lzwAlgorithm;
+    private JToggleButton toggleButton;
 
     public CompressionGUI() {
         super(new GridLayout(3,3));
 
-        JButton huffmanCompressButton = new JButton(new AbstractAction() {
+        GridLayout l = (GridLayout) super.getLayout();
+        l.setVgap(10);
+        l.setHgap(10);
+        JButton compressButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
 //                System.out.println("huffman compressed");
                 log.append("initiate huffman compression\n");
-                // TODO calls huffman compression
+                if (file != null && !toggleButton.isSelected()) {
+
+                    // TODO compress here
+                } else {
+                    System.out.println("you haven't chosen a file ya dingus");
+                }
             }
         });
-        JButton lzwCompressionButton = new JButton(new AbstractAction() {
+        compressButton.setHorizontalAlignment(SwingConstants.CENTER);
+        JButton decompressButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
 //                System.out.println("lzw compressed");
-                log.append("initiate lzw compression\n");
-                // TODO calls lzw compression
+                if (file != null && toggleButton.isSelected()) {
+
+                    log.append("initiate lzw compression\n");
+                    // TODO decompression here
+                } else {
+                    System.out.println("you haven't chosen a file ya dingus");
+                }
             }
         });
-        JButton huffmanDecompressButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                System.out.println("huffman decompressed");
-                log.append("initiate huffman decompression\n");
-                // TODO calls huffman decompression
-            }
-        });
-        JButton lzwDecompressButton = new JButton(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-//                System.out.println("lzw decompressed");
-                log.append("initiate lzw decompression\n");
-                // TODO calls lzw decompression
-            }
-        });
+        decompressButton.setHorizontalAlignment(SwingConstants.CENTER);
+
 
         JButton chooseFileButton = new JButton("Choose file for compression");
         chooseFileButton.addActionListener(this);
+        chooseFileButton.setHorizontalAlignment(SwingConstants.CENTER);
 
-        huffmanCompressButton.setText("Huffman Compression");
-        huffmanDecompressButton.setText("Huffman Decompression");
-        lzwCompressionButton.setText("LZW Compression");
-        lzwDecompressButton.setText("LZW Decompression");
+        toggleButton = new JToggleButton("Huffman");
+        toggleButton.addItemListener(this);
+
+
+        compressButton.setText("Huffman Compression");
+        decompressButton.setText("Huffman Decompression");
         // chooseFileButton.setText("Choose File for Compression");
 
 //        JLabel fileLabel = new JLabel("File to be compressed");
@@ -106,11 +116,9 @@ public class CompressionGUI extends JPanel
         log.setMargin(new Insets(5,5,5,5));
         log.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(log);
-
-        add(huffmanCompressButton);
-        add(lzwCompressionButton);
-        add(huffmanDecompressButton);
-        add(lzwDecompressButton);
+        add(toggleButton);
+        add(decompressButton);
+        add(compressButton);
         add(logScrollPane);
 //        add(fileLabel);
 //        add(compressedLabel);
@@ -133,6 +141,15 @@ public class CompressionGUI extends JPanel
 //        add(logScrollPane, BorderLayout.CENTER);
     }
 
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (toggleButton.isSelected()) {
+            toggleButton.setText("LZW");
+        } else {
+            toggleButton.setText("Huffman");
+        }
+
+    }
     public void actionPerformed(ActionEvent e) {
         //Set up the file chooser.
         if (fc == null) {
@@ -158,7 +175,7 @@ public class CompressionGUI extends JPanel
 
         //Process the results.
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
+            file = fc.getSelectedFile(); // this is the file
             log.append("Attaching file: " + file.getName()
                        + "." + newline);
         } else {
