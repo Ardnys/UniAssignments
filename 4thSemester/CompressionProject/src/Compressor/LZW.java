@@ -3,14 +3,12 @@ package Compressor;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class LZW implements CompressionAlgorithm {
 
@@ -72,25 +70,27 @@ public class LZW implements CompressionAlgorithm {
         short[] shortArr = listToShort(list);
 
         writeShorts(shortArr);
-         encodedString = list.toString();
+        encodedString = list.toString();
 
 //        printMap();
 //         writeToFile(encodedString.getBytes(StandardCharsets.UTF_8));
 
 
-        return new byte[0];
+        return encodedString.getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
     public byte[] decompress(byte[] bytes) {
         ArrayList<Integer> list = bytesToList(bytes);
-        lzwDecode(list);
-        return new byte[0];
+        String s = lzwDecode(list);
+
+        return s.getBytes(StandardCharsets.UTF_8);
+
     }
 
     @Override
     public String getFileFormat() {
-        return null;
+        return ".lzw";
     }
 
     private void initEncodingStream() {
@@ -276,36 +276,49 @@ public class LZW implements CompressionAlgorithm {
     }
 
 
-    private void lzwDecode(ArrayList<Integer> list) {
-        int old = list.get(0); // TODO fix this hopefully understand too
-        int sym = 0;
+    private String lzwDecode(ArrayList<Integer> list) {
+        /*
+        Here's a step-by-step guide to decompressing LZW-encoded data:
+
+        Initialize the dictionary with all possible single-character patterns.
+
+        Read the first code from the compressed data.
+
+        Look up the corresponding pattern in the dictionary and output it.
+
+        While there are still codes left in the compressed data:
+
+        a. Read the next code from the compressed data.
+
+        b. If the code is not in the dictionary, create a new pattern by concatenating the last pattern output with the first character of the last pattern output. Output this new pattern.
+
+        c. If the code is in the dictionary, look up the corresponding pattern and output it.
+
+        d. Add a new dictionary entry for the last pattern output concatenated with the first character of the pattern just output. This new entry is assigned the next available code.
+
+        The decompressed data is the concatenation of all the patterns output during the decompression process.
+         */
+        StringBuilder output = new StringBuilder();
+        String prev = decodingMap.get(list.get(0));
+        output.append(prev);
+        String other = "";
+        int code;
         int next = 256;
-        StringBuilder sb = new StringBuilder();
-        sb.append(decodingMap.get(old));
-        String s = "";
-        s = s+decodingMap.get(old);
-        StringBuilder prev = new StringBuilder();
-        prev.append(s.charAt(0));
-        //System.out.print(s);
-        for (int i = 0; i < list.size()-1; i++) {
-            sym = list.get(i+1);
-            if (!decodingMap.containsKey(sym)) {
-                sb.delete(0, sb.length());
-                sb.append(decodingMap.get(old));
-                sb.append(prev);
 
-            } else {
-                sb.append(decodingMap.get(sym));
+        for (int i = 1; i < list.size(); i++) {
+            code = list.get(i);
+            if (decodingMap.containsKey(code)) {
+                other = decodingMap.get(code);
+                output.append(other);
+
             }
-            System.out.print(sb);
-            prev.delete(0, prev.length());
-            prev.append(sb.charAt(0));
-            String uh = decodingMap.get(old) + prev;
-            decodingMap.put(next, uh);
-            next++;
-            old = sym;
+            String s = prev + other.charAt(0);
+            decodingMap.put(next++, s);
+            prev = other;
         }
-
+        decodedString = output.toString();
+        System.out.println(decodedString);
+        return output.toString();
     }
 
     public static void main(String[] args) {

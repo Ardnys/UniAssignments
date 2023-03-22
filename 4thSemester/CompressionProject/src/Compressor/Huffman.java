@@ -179,7 +179,7 @@ public class Huffman implements CompressionAlgorithm {
 
     @Override
     public String getFileFormat() {
-        return null;
+        return ".hf";
     }
 
     public void getByteArr(byte[] bytes) {
