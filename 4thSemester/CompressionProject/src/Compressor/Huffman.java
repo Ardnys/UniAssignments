@@ -158,11 +158,13 @@ public class Huffman implements CompressionAlgorithm {
     @Override
     public byte[] decompress(byte[] bytes) {
         // first read the header
-        int l = readHeader();
+        //int l = readHeader();
 
         // read bytes, convert it to BitSet, convert it to binary String and reverse it
+        byte[] byteBody = readHeader();
+        int l = byteBody.length;
 
-        String thembits =  reverseString(bitsToBitsLOL(bytesToBits(readBytes(l))));  // lol
+        String thembits =  reverseString(bitsToBitsLOL(bytesToBits(byteBody)));  // lol
         //System.out.println(encodedString + "\nlen: " + encodedString.length());
 
         // substring it to remove padding
@@ -403,15 +405,19 @@ public class Huffman implements CompressionAlgorithm {
     }
 
 
-    public int readHeader() {
+    public byte[] readHeader() {
         // first read an integer from the stream.
         int bitlen = 0;
+        byte[] bytes = new byte[0];
         try {
             initForDecompression();
 
             bitlen = objInStream.readInt();
+            bytes = new byte[bitlen];
 
             decodingMap = (Map<String, Byte>) objInStream.readObject();
+            objInStream.read(bytes);
+
             //System.out.println("map is " + decodingMap);
 
              //int treeLength = objInStream.readInt();
@@ -452,7 +458,7 @@ public class Huffman implements CompressionAlgorithm {
             ce.printStackTrace();
             System.out.println("what do you mean class not found");
         }
-        return bitlen;
+        return bytes;
     }
 
     public byte[] readBytes(int codeLength) {

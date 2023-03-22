@@ -69,6 +69,7 @@ public class LZW implements CompressionAlgorithm {
 
         short[] shortArr = listToShort(list);
 
+
         writeShorts(shortArr);
         encodedString = list.toString();
 
@@ -90,7 +91,7 @@ public class LZW implements CompressionAlgorithm {
 
     @Override
     public String getFileFormat() {
-        return ".lzw";
+        return ".lsw";
     }
 
     private void initEncodingStream() {
@@ -328,34 +329,6 @@ public class LZW implements CompressionAlgorithm {
 
         l.decompress(l.readFile(l.compressPath));
 
-
-
         System.out.println("\nEND OF PROGRAM");
     }
-
-//    public String escapeString(String s) {
-//        // define the characters that need to be escaped
-//        String specialChars = "\\[]*+-?.,|^$&";
-//
-//        // replace each special character with its escape sequence
-//        StringBuilder sb = new StringBuilder();
-//        Pattern p = Pattern.compile("([" + specialChars + "\"])");
-//        Matcher m = p.matcher(s);
-//        while (m.find()) {
-//            String matched = m.group(1);
-//            if (matched.equals("\\")) {
-//                m.appendReplacement(sb, "\\\\\\\\");
-//            } else {
-//                m.appendReplacement(sb, "\\\\" + matched);
-//            }
-//        }
-//        m.appendTail(sb);
-//
-//        // escape the single and double quotes
-//        sb = new StringBuilder(sb.toString().replace("'", "\\'").replace("\"", "\\\""));
-//
-//        return sb.toString();
-//    }
-
-
 }
