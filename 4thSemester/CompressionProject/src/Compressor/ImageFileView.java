@@ -70,6 +70,9 @@ public class ImageFileView extends FileView {
                 type = "Text File";
             } else if (f.isDirectory()) {
                 type = "Directory";
+            } else if (extension.equals(Utils.lzw)) {
+                type = "LZW File";
+
             }
         }
         return type;
@@ -89,6 +92,9 @@ public class ImageFileView extends FileView {
                 icon = pngIcon;
             } else if (f.isDirectory()) {
                 icon = folderIcon;
+            } else if (extension.equals(Utils.lzw)) {
+                icon = txtIcon;
+
             }
         }
         return icon;

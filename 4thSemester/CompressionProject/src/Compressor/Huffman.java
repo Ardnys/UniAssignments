@@ -1,6 +1,8 @@
 package Compressor;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -111,6 +113,14 @@ public class Huffman implements CompressionAlgorithm {
     ArrayList<HuffmanNode> freqArray = new ArrayList<>(); // list for char freqs
     Map<String, Byte> codingMap = new HashMap<>();
 
+    public int getCodeLength() {
+        return codeLength;
+    }
+
+    public Map<String, Byte> getCodingMap() {
+        return codingMap;
+    }
+
     Map<String, Byte> decodingMap;
 
     int sz = 0;
@@ -118,7 +128,7 @@ public class Huffman implements CompressionAlgorithm {
     int codeLength = 0;
 
 
-    String sourcePath = "readthis/lorem.txt";
+    String sourcePath = "readthis/small.txt";
     String compressPath = sourcePath + ".hf";
     String decompressPath = "readthis/decomp.txt";
     File sourceFile = new File(sourcePath);
@@ -148,10 +158,23 @@ public class Huffman implements CompressionAlgorithm {
         String body = createEncodedBody(bytes);
         //System.out.println(" "+body);
         encodedString = body;
+
         BitSet bits = strToBit(body);
 
 //        writeCompressedFile(bits, "readthis/comp.txt");
-        
+        ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+//        try {
+//            ObjectOutputStream objOutStream = new ObjectOutputStream(byteOutStream);
+//
+//            objOutStream.writeInt(codeLength);
+//            System.out.println("num: "+codeLength);
+//            objOutStream.writeObject(codingMap);
+//            objOutStream.write(bits.toByteArray());
+//            // might require padding
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         return bits.toByteArray();
     }
     
@@ -163,12 +186,21 @@ public class Huffman implements CompressionAlgorithm {
         // read bytes, convert it to BitSet, convert it to binary String and reverse it
         byte[] byteBody = readHeader();
         int l = byteBody.length;
+        System.out.println("byte length is: " + l);
+        BitSet bitbits = bytesToBits(byteBody);
+        System.out.println("bit len: "+bitbits.length());
 
-        String thembits =  reverseString(bitsToBitsLOL(bytesToBits(byteBody)));  // lol
+//        String iamdone = new String(byteBody);
+        String bitStr = bitsToBitsLOL(bitbits);
+        System.out.println("straight to string: "+bitStr);
+
+        String thembits =  reverseString(bitStr);  // lol
+        System.out.println("after reverse: " + thembits);
         //System.out.println(encodedString + "\nlen: " + encodedString.length());
-
+        System.out.println("Thembits length: " + thembits.length());
         // substring it to remove padding
-        thembits = thembits.substring(1, l);
+        thembits = thembits.substring(1);
+        System.out.println(thembits);
 //        System.out.println(thembits +"\nlen: " + (l));
         // thembits.substring(0, thembits.length()-40)
 
@@ -262,7 +294,7 @@ public class Huffman implements CompressionAlgorithm {
         // str += "1"; // bits demand a sacrifice
         str = "1" + str + "1"; // i hate this soo much
         codeLength = str.length();
-        System.out.println(codeLength);
+        System.out.println(str);
         // System.out.println(strlen);
         BitSet bits = new BitSet(codeLength);
         int ctr = 0;
@@ -309,15 +341,16 @@ public class Huffman implements CompressionAlgorithm {
     }
 
     public byte[] renamethis() {
-        byte[] bytes = new byte[(int) sourceFile.length()];
+//        byte[] bytes = new byte[(int) sourceFile.length()];
         try {
-            inputStream.read(bytes);
+//            inputStream.read(bytes);
+            return Files.readAllBytes(Paths.get(sourcePath));
             //System.out.println("available bits after reading: " + inputStream.available());
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("error while reading the source file");
         }
-        return bytes;
+        return null;
     }
     
     private void initStream() {
@@ -413,6 +446,7 @@ public class Huffman implements CompressionAlgorithm {
             initForDecompression();
 
             bitlen = objInStream.readInt();
+            //int boi = bitlen & 0x0000FFFF;
             bytes = new byte[bitlen];
 
             decodingMap = (Map<String, Byte>) objInStream.readObject();
@@ -476,8 +510,22 @@ public class Huffman implements CompressionAlgorithm {
     public BitSet bytesToBits(byte[] bytes) {
         // convert byte array to BitSet
         // i am just trying to undo what i did, hoping that it works lol
+        // caps at 2^13
 
-        return BitSet.valueOf(bytes);
+        BitSet bitSet = new BitSet(bytes.length * 8); // create a new BitSet object with the correct size
+
+// loop through each byte in the byte array and set the corresponding bits in the BitSet
+        for (int i = 0; i < bytes.length; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (((bytes[i] >> j) & 1) == 1) {
+                    bitSet.set(i * 8 + j);
+                }
+            }
+        }
+
+        return bitSet;
+
+//        return BitSet.valueOf(bytes);
     }
     
     public String bitsToBitsLOL(BitSet bits) {

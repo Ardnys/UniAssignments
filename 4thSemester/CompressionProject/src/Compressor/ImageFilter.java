@@ -48,6 +48,7 @@ public class ImageFilter extends FileFilter {
             return extension.equals(Utils.txt) ||
                     extension.equals(Utils.jpeg) ||
                     extension.equals(Utils.jpg) ||
+                    extension.equals(Utils.lzw) ||
                     extension.equals(Utils.png);
         }
 

@@ -34,6 +34,9 @@ package Compressor;
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.ColorChooserUI;
@@ -60,6 +63,7 @@ public class CompressionGUI extends JPanel
     private Huffman huffmanAlgorithm;
     private LZW lzwAlgorithm;
     private JToggleButton toggleButton;
+    private FileAyo FIO;
 
     public CompressionGUI() {
         super(new GridLayout(3,3));
@@ -70,13 +74,42 @@ public class CompressionGUI extends JPanel
         JButton compressButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                System.out.println("huffman compressed");
-                log.append("initiate huffman compression\n");
-                if (file != null && !toggleButton.isSelected()) {
+                // TODO compress here
+                if (file != null) {
+                    if (!toggleButton.isSelected()) {
+                        log.append("initiate huffman compression\n");
+                        algorithm = new Huffman();
+                        initFileIO(algorithm.getFileFormat());
+                        // huffman is messy i'll do it later
+                        byte[] bytes = FIO.readFile(false);
+                        byte[] compressedBytes = algorithm.compress(bytes);
+                        // however, compressedBytes is not enough: we need the hashtable we used to encode the messages
+                        // as well as the length of the encoded messages
+                        // FIO.writeFile();
+                        /*
+                        HUFFMAN WORKS ON ITS OWN BECAUSE OF MY DESIGN FLAW
+                        BUT ALSO DOESN'T WORK AFTER SOME POINT I COULDN'T FIGURE IT OUT
+                         */
 
-                    // TODO compress here
+
+
+
+                    }
+                    else if (toggleButton.isSelected()) {
+                        log.append("initiate lzw compression\n");
+                        algorithm = new LZW();
+                        initFileIO(algorithm.getFileFormat());
+                        // System.out.println(algorithm.getFileFormat());
+                        // this one works
+                        byte[] bytes = FIO.readFile(false);
+                        byte[] compressedBytes = algorithm.compress(bytes);
+                        short[] shorts = new short[compressedBytes.length/2];
+                        ByteBuffer.wrap(compressedBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
+                        FIO.writeFile(compressedBytes, true);
+
+                    }
                 } else {
-                    System.out.println("you haven't chosen a file ya dingus");
+                    log.append("you haven't chosen a file ya dingus\n");
                 }
             }
         });
@@ -84,29 +117,48 @@ public class CompressionGUI extends JPanel
         JButton decompressButton = new JButton(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                System.out.println("lzw compressed");
-                if (file != null && toggleButton.isSelected()) {
+                // TODO decompression here
+                if (file != null) {
+                    if (!toggleButton.isSelected()) {
+                        log.append("initiate huffman decompression\n");
+                        // there's another case but we'll just not right now
+                        assert FIO.getFileFormat().equals(algorithm.getFileFormat());
+                        FIO.initStreamForHuffman();                                // first initialise the stream because different objects will be read
+                        int bodyLength = FIO.readHuffmanHeader();                  // second, read huffman header
+                        Map<String, Byte> decodingMap = FIO.readHuffmanTable();    // third, read decoding table
+                        byte[] bytes = FIO.readHuffmanBytes(bodyLength);           // finally, read the encoded bytes
 
-                    log.append("initiate lzw compression\n");
-                    // TODO decompression here
+                    }
+                    else if (toggleButton.isSelected()){
+                        log.append("initiate lzw decompression\n");
+                        //algorithm = new LZW();
+                        //initFileIO(algorithm.getFileFormat());
+                        //assert algorithm instanceof LZW; // it's gonna blow up :D
+                        assert FIO.getFileFormat().equals(algorithm.getFileFormat()); // nukes out
+
+                        byte[] bytes = FIO.readFile(true);
+                        byte[] decompressedBytes = algorithm.decompress(bytes);
+                        FIO.writeFile(decompressedBytes, false);
+                    }
+
                 } else {
-                    System.out.println("you haven't chosen a file ya dingus");
+                    log.append("you haven't chosen a file ya dingus\n");
                 }
             }
         });
         decompressButton.setHorizontalAlignment(SwingConstants.CENTER);
 
 
-        JButton chooseFileButton = new JButton("Choose file for compression");
+        JButton chooseFileButton = new JButton("open file explorer");
         chooseFileButton.addActionListener(this);
         chooseFileButton.setHorizontalAlignment(SwingConstants.CENTER);
 
-        toggleButton = new JToggleButton("Huffman");
+        toggleButton = new JToggleButton("Huffman (Click to Change)");
         toggleButton.addItemListener(this);
 
 
-        compressButton.setText("Huffman Compression");
-        decompressButton.setText("Huffman Decompression");
+        compressButton.setText("Compress File");
+        decompressButton.setText("Decompress File");
         // chooseFileButton.setText("Choose File for Compression");
 
 //        JLabel fileLabel = new JLabel("File to be compressed");
@@ -116,37 +168,21 @@ public class CompressionGUI extends JPanel
         log.setMargin(new Insets(5,5,5,5));
         log.setEditable(false);
         JScrollPane logScrollPane = new JScrollPane(log);
+        JLabel label = new JLabel("HUFFMAN DOESN'T WORK");
         add(toggleButton);
         add(decompressButton);
         add(compressButton);
         add(logScrollPane);
-//        add(fileLabel);
-//        add(compressedLabel);
         add(chooseFileButton);
-
-        // below is the code from docs
-        //        super(new BorderLayout());
-
-        //Create the log first, because the action listener
-        //needs to refer to it.
-//        log = new JTextArea(5,20);
-//        log.setMargin(new Insets(5,5,5,5));
-//        log.setEditable(false);
-//        JScrollPane logScrollPane = new JScrollPane(log);
-
-//        JButton sendButton = new JButton("Choose File...");
-//        sendButton.addActionListener(this);
-//
-//        add(sendButton, BorderLayout.PAGE_START);
-//        add(logScrollPane, BorderLayout.CENTER);
+        add(label);
     }
 
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (toggleButton.isSelected()) {
-            toggleButton.setText("LZW");
+            toggleButton.setText("LZW (Click to Change)");
         } else {
-            toggleButton.setText("Huffman");
+            toggleButton.setText("Huffman (Click to Change) DOESN'T WORK DON'T PRESS");
         }
 
     }
@@ -185,6 +221,10 @@ public class CompressionGUI extends JPanel
 
         //Reset the file chooser for the next time it's shown.
         fc.setSelectedFile(null);
+    }
+
+    private void initFileIO(String format) {
+        FIO = FileAyo.getInstance(file.getPath(), format);
     }
 
     /**
