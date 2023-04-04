@@ -74,7 +74,10 @@ public class Trie {
     public int traverse(TrieNode node, String pattern, int level, boolean isEnd, char letter) {
         if (pattern.length() <= level) {
             if (pattern.length() == level && isEnd) {
-                addToMap(letter);
+                if (letter != pattern.charAt(level-1)) {
+                    addToMap(letter, 1);
+                    System.out.println("added the last " + letter);
+                }
                 return 1;
             }
             return 0;
@@ -84,30 +87,37 @@ public class Trie {
             // check all
             for (int i = 0; i < node.bois.length; i++) {
                 if (node.bois[i] != null) {
-                    System.out.println("char: " + (char)(i+'a') + " in level: " + (level + 1));
+                    System.out.println("1 char: " + (char)(i+'a') + " in level: " + (level + 1));
                     uh += traverse(node.bois[i], pattern, level+1, node.bois[i].wordEnd,(char) (i + 'a'));
                 }
             }
-            if (uh != 0) {
+            if (uh != 0 && letter != pattern.charAt(level-1)) {
                 // then there is a success so add it to map
-                addToMap(letter);
+                addToMap(letter, uh);
+                System.out.println("success " + letter + " and " + uh);
             }
         } else {
             int idx = pattern.charAt(level) - 'a';
             if (node.bois[idx] == null) {
                 return 0;
             }
-            System.out.println("char: " + (char)(idx+'a') + " in level: " + (level + 1));
-            traverse(node.bois[idx], pattern, level+1, node.bois[idx].wordEnd, (char) (idx + 'a'));
+            System.out.println("2 char: " + (char)(idx+'a') + " in level: " + (level + 1));
+//            addToMap((char) (idx + 'a'));
+            uh += traverse(node.bois[idx], pattern, level+1, node.bois[idx].wordEnd, (char) (idx + 'a'));
+            if (uh != 0 && letter != pattern.charAt(level-1)) {
+                // then there is a success so add it to map
+                addToMap(letter, uh);
+                System.out.println("success " + letter + " and " + uh);
+            }
         }
         return uh;
     }
 
-    private void addToMap(char letter) {
+    private void addToMap(char letter, int occurrence) {
         if (!map.containsKey(letter)) {
-            map.put(letter, 1);
+            map.put(letter, occurrence);
         } else {
-            map.replace(letter, map.get(letter)+1);
+            map.replace(letter, map.get(letter)+occurrence);
         }
     }
 
@@ -117,7 +127,7 @@ public class Trie {
         for (String s : word.split(",")) {
             t.insert(s);
         }
-        String pattern = "  l ";
+        String pattern = "c    ";
         t.suggest(pattern);
         System.out.println(t.map);
     }
