@@ -9,15 +9,20 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 public class HangmanGame {
-    private static final String RANDOM_WORDS = "randomWords.txt";
+    private static final String RANDOM_WORDS = "wordList.txt";
     private static final int MAX_GUESSES = 6;
-
     private String secretWord;
     private boolean[] guessedLetters;
     private int numGuesses;
+    public Trie trie;
+    public Map<Character, Integer> topSuggestions;
 
     public HangmanGame() {
         List<String> words = readWordsFromFile(RANDOM_WORDS);
+        trie = new Trie();
+        for (String s : words) {
+            trie.insert(s);
+        }
         Random rand = new Random();
         secretWord = words.get(rand.nextInt(words.size()));
         guessedLetters = new boolean[secretWord.length()];
@@ -54,15 +59,25 @@ public class HangmanGame {
         }
         displayGameOutcome();
     }
-
-    public static void main(String []s) {
-        new HangmanGame().play();
+    private String displaySuggestions() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Character, Integer> entry : topSuggestions.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append(':');
+            sb.append(' ');
+            sb.append(entry.getValue());
+            sb.append('\n');
+        }
+        return sb.toString();
     }
     private void displayGameStatus() {
-        System.out.println("Secret word: " + getSecretWordWithGuesses());
+        String guessedWord = getSecretWordWithGuesses();
+        String suggestionPattern = guessedWord.replace(" ", "");
+        topSuggestions = trie.suggest(suggestionPattern);
+        System.out.println("Secret word: " + guessedWord);
         System.out.println("Guesses left: " + (MAX_GUESSES - numGuesses));
+        System.out.println("Top letters: " + displaySuggestions());
     }
-
     private String getGuessFromUser() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your guess: ");
@@ -89,7 +104,7 @@ public class HangmanGame {
             }
             sb.append(" ");
         }
-        return sb.toString().trim();
+        return sb.toString();
     }
 
     private void displayGameOutcome() {
@@ -118,6 +133,9 @@ public class HangmanGame {
             System.err.println("Error reading from file: " + e.getMessage());
         }
         return words;
+    }
+    public static void main(String []s) {
+        new HangmanGame().play();
     }
 }
 
