@@ -136,14 +136,14 @@ public class Trie {
         }
     }
 
-    public static void main(String[] args) {
-        Trie t = new Trie();
-        String word = "and,art,ant,anton,boy,bot,boot,bolt,bald,cut,cute,clean,clear,coat,cold";
-        for (String s : word.split(",")) {
-            t.insert(s);
-        }
-        String pattern = "c    ";
-        t.suggest(pattern);
-        System.out.println(t.map);
-    }
+//    public static void main(String[] args) {
+//        Trie t = new Trie();
+//        String word = "and,art,ant,anton,boy,bot,boot,bolt,bald,cut,cute,clean,clear,coat,cold";
+//        for (String s : word.split(",")) {
+//            t.insert(s);
+//        }
+//        String pattern = "c    ";
+//        t.suggest(pattern);
+//        System.out.println(t.map);
+//    }
 }

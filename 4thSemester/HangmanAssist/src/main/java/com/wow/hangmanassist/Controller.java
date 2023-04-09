@@ -16,31 +16,44 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-    private ObservableList<String> suggestions = FXCollections.observableArrayList("i am", "testing", "this", "list view");
+    private ObservableList<String> suggestions = FXCollections.observableArrayList();
     @FXML
     private ListView<String> list = new ListView<>();
     @FXML
     private TextField textField;
     @FXML
     private TextArea textArea;
-    private String text;
+    private String guess;
+    private final HangmanGame game = new HangmanGame();
 
     public void choose(ActionEvent event) {
-        text = textField.getText();
-//        textArea.setText(text);
-        textArea.appendText(text + "\n");
-        suggestions.clear();
+        guess = textField.getText();
+//        textArea.setText(guess);
+        if (!game.playFromGUI(guess)) {
+            textArea.appendText(game.getGameOutcome());
+        } else {
+            String status = game.getGameStatus();
+            textArea.appendText(status);
+            String topSuggestions = game.displaySuggestions();
+            String[] suggestionArr = topSuggestions.split("\n");
+            suggestions.clear();
+            suggestions.addAll(suggestionArr);
+        }
+//        textArea.appendText(guess + "\n");
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         list.setItems(suggestions);
+        String status = game.getGameStatus();
+        textArea.appendText(status);
 
         list.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                text = list.getSelectionModel().getSelectedItem();
-                textField.setText(text);
+                guess = list.getSelectionModel().getSelectedItem(); // TODO this is null for some reason
+                System.out.println(guess);
+                textField.setText(guess.substring(0,1));
             }
         });
     }

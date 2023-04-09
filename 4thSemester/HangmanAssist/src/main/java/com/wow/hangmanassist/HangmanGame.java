@@ -29,6 +29,58 @@ public class HangmanGame {
         numGuesses = 0;
     }
 
+    public boolean playFromGUI(String guess) {
+        if (numGuesses < MAX_GUESSES && !isWordGuessed()) {
+            if (guess.length() == 1) {
+                boolean foundLetter = false;
+                for (int i = 0; i < secretWord.length(); i++) {
+                    if (secretWord.charAt(i) == guess.charAt(0)) {
+                        foundLetter = true;
+                        guessedLetters[i] = true;
+                    }
+                }
+                if (!foundLetter) {
+                    numGuesses++;
+                }
+            } else {
+                if (guess.equals(secretWord)) {
+                    guessedLetters = new boolean[secretWord.length()];
+                    for (int i = 0; i < secretWord.length(); i++) {
+                        guessedLetters[i] = true;
+                    }
+                } else {
+                    numGuesses++;
+                }
+            }
+            return !isWordGuessed();
+        }
+        else {
+            return false;
+        }
+    }
+
+    public String getGameStatus() {
+        String guessedWord = getSecretWordWithGuesses();
+        String suggestionPattern = guessedWord.replace(" ", "");
+        topSuggestions = trie.suggest(suggestionPattern);
+//        System.out.println("Secret word: " + guessedWord);
+//        System.out.println("Guesses left: " + (MAX_GUESSES - numGuesses));
+//        System.out.println("Top letters: " + displaySuggestions());
+
+        return "Secret word: " +
+                guessedWord +
+                "\nGuesses left: " +
+                (MAX_GUESSES - numGuesses) +
+                "\n";
+    }
+
+    public String getGameOutcome() {
+        if (isWordGuessed()) {
+            return "Congratulations! You guessed the word.";
+        } else {
+            return "Sorry, you ran out of guesses. The word was " + secretWord;
+        }
+    }
     public void play() {
         System.out.println("Welcome to Hangman!");
         while (numGuesses < MAX_GUESSES && !isWordGuessed()) {
@@ -41,7 +93,6 @@ public class HangmanGame {
                         foundLetter = true;
                         guessedLetters[i] = true;
                     }
-
                 }
                 if (!foundLetter) {
                     numGuesses++;
@@ -59,7 +110,7 @@ public class HangmanGame {
         }
         displayGameOutcome();
     }
-    private String displaySuggestions() {
+    public String displaySuggestions() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Character, Integer> entry : topSuggestions.entrySet()) {
             sb.append(entry.getKey());
@@ -76,7 +127,7 @@ public class HangmanGame {
         topSuggestions = trie.suggest(suggestionPattern);
         System.out.println("Secret word: " + guessedWord);
         System.out.println("Guesses left: " + (MAX_GUESSES - numGuesses));
-        System.out.println("Top letters: " + displaySuggestions());
+        System.out.println("Top letters: " + displaySuggestions() + "\n");
     }
     private String getGuessFromUser() {
         Scanner scanner = new Scanner(System.in);
@@ -135,7 +186,7 @@ public class HangmanGame {
         return words;
     }
     public static void main(String []s) {
-        new HangmanGame().play();
+        new HangmanGame();
     }
 }
 
