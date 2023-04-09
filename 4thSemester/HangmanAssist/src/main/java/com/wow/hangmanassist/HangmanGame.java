@@ -11,6 +11,8 @@ import java.util.*;
 public class HangmanGame {
     private static final String RANDOM_WORDS = "wordList.txt";
     private static final int MAX_GUESSES = 6;
+    private List<String> words;
+    private Random rand = new Random();
     private String secretWord;
     private boolean[] guessedLetters;
     private int numGuesses;
@@ -18,12 +20,15 @@ public class HangmanGame {
     public Map<Character, Integer> topSuggestions;
 
     public HangmanGame() {
-        List<String> words = readWordsFromFile(RANDOM_WORDS);
+        words = readWordsFromFile(RANDOM_WORDS);
         trie = new Trie();
         for (String s : words) {
             trie.insert(s);
         }
-        Random rand = new Random();
+        pickRandomWord();
+    }
+    
+    public void pickRandomWord() {
         secretWord = words.get(rand.nextInt(words.size()));
         guessedLetters = new boolean[secretWord.length()];
         numGuesses = 0;
@@ -76,9 +81,9 @@ public class HangmanGame {
 
     public String getGameOutcome() {
         if (isWordGuessed()) {
-            return "Congratulations! You guessed the word " + secretWord;
+            return "Congratulations! You guessed the word " + secretWord + "\n";
         } else {
-            return "Sorry, you ran out of guesses. The word was " + secretWord;
+            return "Sorry, you ran out of guesses. The word was " + secretWord + "\n";
         }
     }
     public void play() {

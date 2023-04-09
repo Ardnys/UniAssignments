@@ -28,7 +28,8 @@ public class Controller implements Initializable {
 
     public void choose(ActionEvent event) {
         guess = textField.getText();
-        System.out.println("guess is: " + guess);
+        textField.clear();
+//        System.out.println("guess is: " + guess);
 //        textArea.setText(guess);
         if (!game.playFromGUI(guess)) {
             textArea.appendText(game.getGameOutcome());
@@ -49,7 +50,7 @@ public class Controller implements Initializable {
         list.setItems(suggestions);
         String status = game.getGameStatus();
         textArea.appendText(status);
-        System.out.println("does this execute");
+//        System.out.println("does this execute");
 
         list.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -58,10 +59,17 @@ public class Controller implements Initializable {
                 // t1 is useful. it's the index of the list. it becomes -1 when i click the button
                 if (t1.intValue() >= 0){
                     guess = list.getSelectionModel().getSelectedItem();
-                    System.out.println("init guess is " + guess);
+//                    System.out.println("init guess is " + guess);
                     textField.setText(guess.substring(0, 1));
                 }
             }
         });
+    }
+
+    public void replay(ActionEvent event) {
+        game.pickRandomWord();
+        String status = game.getGameStatus();
+        textArea.appendText(status);
+        suggestions.clear();
     }
 }
