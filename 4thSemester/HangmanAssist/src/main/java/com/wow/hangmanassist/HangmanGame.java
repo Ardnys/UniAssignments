@@ -76,7 +76,7 @@ public class HangmanGame {
 
     public String getGameOutcome() {
         if (isWordGuessed()) {
-            return "Congratulations! You guessed the word.";
+            return "Congratulations! You guessed the word " + secretWord;
         } else {
             return "Sorry, you ran out of guesses. The word was " + secretWord;
         }

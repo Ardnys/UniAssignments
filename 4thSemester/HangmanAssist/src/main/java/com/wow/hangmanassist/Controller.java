@@ -28,11 +28,13 @@ public class Controller implements Initializable {
 
     public void choose(ActionEvent event) {
         guess = textField.getText();
+        System.out.println("guess is: " + guess);
 //        textArea.setText(guess);
         if (!game.playFromGUI(guess)) {
             textArea.appendText(game.getGameOutcome());
         } else {
             String status = game.getGameStatus();
+            textArea.appendText("Guessed: " + guess + "\n");
             textArea.appendText(status);
             String topSuggestions = game.displaySuggestions();
             String[] suggestionArr = topSuggestions.split("\n");
@@ -47,13 +49,18 @@ public class Controller implements Initializable {
         list.setItems(suggestions);
         String status = game.getGameStatus();
         textArea.appendText(status);
+        System.out.println("does this execute");
 
         list.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                guess = list.getSelectionModel().getSelectedItem(); // TODO this is null for some reason
-                System.out.println(guess);
-                textField.setText(guess.substring(0,1));
+//                System.out.println("observable value: " + observableValue + "\nnumber: " + number + "\nt1: " + t1);
+                // t1 is useful. it's the index of the list. it becomes -1 when i click the button
+                if (t1.intValue() >= 0){
+                    guess = list.getSelectionModel().getSelectedItem();
+                    System.out.println("init guess is " + guess);
+                    textField.setText(guess.substring(0, 1));
+                }
             }
         });
     }
