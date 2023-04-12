@@ -20,23 +20,23 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: rgb(50,50,50);">
                <children>
-                  <VBox prefHeight="398.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <Label alignment="CENTER" prefHeight="27.0" prefWidth="1000.0" text="Hangman" textFill="WHITE" VBox.vgrow="NEVER">
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="1000.0" text="Hangman" textAlignment="CENTER" textFill="WHITE" VBox.vgrow="NEVER">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="textArea" prefHeight="560.0" prefWidth="296.0" />
+                        <TextArea fx:id="textArea" prefHeight="458.0" prefWidth="346.0" />
                      </children>
                   </VBox>
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" style="-fx-background-color: rgb(50,50,50);">
                <children>
-                  <VBox layoutX="85.0" layoutY="76.0" prefHeight="398.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <VBox layoutX="85.0" layoutY="76.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox>
                            <children>
                               <Label alignment="CENTER" prefHeight="27.0" prefWidth="812.0" text="Computer Aid" textAlignment="CENTER" textFill="WHITE">
                                  <font>
@@ -52,10 +52,10 @@
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="204.0" minWidth="10.0" prefWidth="192.0" />
                           </columnConstraints>
                           <rowConstraints>
-                            <RowConstraints maxHeight="54.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
-                            <RowConstraints maxHeight="74.0" minHeight="10.0" prefHeight="52.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="74.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="57.0" minHeight="10.0" prefHeight="24.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="106.0" minHeight="10.0" prefHeight="66.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="105.0" minHeight="10.0" prefHeight="77.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="74.0" minHeight="10.0" prefHeight="73.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="101.0" text="Player Input" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="1">
@@ -63,7 +63,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <Label text="Enter Guess" textFill="WHITE" GridPane.rowIndex="1">
+                              <Label text="Enter Guess -&gt;" textFill="WHITE" GridPane.rowIndex="1">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -78,6 +78,8 @@
                                     <Insets />
                                  </GridPane.margin></Button>
                               <Button alignment="CENTER" mnemonicParsing="false" onAction="#replay" prefHeight="25.0" prefWidth="59.0" text="Replay" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                              <Label alignment="CENTER" prefHeight="69.0" prefWidth="143.0" text="PLAYER GUIDE&#10;--------------------------&#10;Enter a letter or a word &#10;in the Player Input section" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER" prefHeight="65.0" prefWidth="141.0" text="Click to suggestions in the&#10;Computer Aid section to&#10;guess that letter." textAlignment="CENTER" textFill="WHITE" GridPane.rowIndex="3" />
                            </children>
                            <VBox.margin>
                               <Insets />
