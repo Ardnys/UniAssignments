@@ -68,9 +68,6 @@ public class HangmanGame {
         String guessedWord = getSecretWordWithGuesses();
         String suggestionPattern = guessedWord.replace(" ", "");
         topSuggestions = trie.suggest(suggestionPattern);
-//        System.out.println("Secret word: " + guessedWord);
-//        System.out.println("Guesses left: " + (MAX_GUESSES - numGuesses));
-//        System.out.println("Top letters: " + displaySuggestions());
 
         return "Secret word: " +
                 guessedWord +

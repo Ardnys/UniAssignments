@@ -2,10 +2,8 @@ package com.wow.hangmanassist;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class MyFileReader {
     private BufferedReader reader;
@@ -35,25 +33,4 @@ public class MyFileReader {
         }
         return list;
     }
-
-//    public static void main(String[] args) {
-//        MyFileReader mfr;
-//        List<String> list = null;
-//        try {
-//            mfr = new MyFileReader(Objects.requireNonNull(MyFileReader.class.getResource("wordList.txt")).toURI());
-//            list = mfr.read();
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//            System.out.println("error while uri");
-//        }
-//        assert list != null;
-//        Trie trie = new Trie();
-//        for (String s : list) {
-//            trie.insert(s);
-//        }
-//        // System.out.println(trie.search("foster"));
-////        String pattern = "c      ";
-////        trie.suggest(pattern);
-////        System.out.println(trie.map);
-//    }
 }

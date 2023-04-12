@@ -12,11 +12,11 @@ public class Trie {
     Map<Character, Integer> map;
 
     public class TrieNode {
-        public TrieNode[] bois = new TrieNode[26]; // for all letters in the alphabet
+        public TrieNode[] letters = new TrieNode[26]; // for all letters in the alphabet
         public boolean wordEnd = false;
 
         public TrieNode() {
-            for (TrieNode n : bois) {
+            for (TrieNode n : letters) {
                 n = null;
             }
         }
@@ -32,10 +32,10 @@ public class Trie {
         TrieNode current = root;
         for (char c : charArray) {
             int idx = c - 'a';
-            if (current.bois[idx] == null) {
-                current.bois[idx] = new TrieNode();
+            if (current.letters[idx] == null) {
+                current.letters[idx] = new TrieNode();
             }
-            current = current.bois[idx];
+            current = current.letters[idx];
         }
         current.wordEnd = true;
     }
@@ -46,10 +46,10 @@ public class Trie {
         TrieNode current = root;
         for (char c : charArray) {
             int idx = c - 'a';
-            if (current.bois[idx] == null) {
+            if (current.letters[idx] == null) {
                 return false;
             }
-            current = current.bois[idx];
+            current = current.letters[idx];
         }
         return current.wordEnd;
     }
@@ -61,16 +61,16 @@ public class Trie {
         char c = pattern.charAt(0);
         if (c == '_') {
             // if it starts empty, everything is checked
-            for (int i = 0; i < crawl.bois.length; i++) {
-                if (crawl.bois[i] != null) {
+            for (int i = 0; i < crawl.letters.length; i++) {
+                if (crawl.letters[i] != null) {
                     // map.put((char) (i + 'a'), 1);
-                    traverse(crawl.bois[i], pattern, 1, crawl.bois[i].wordEnd, (char) (i + 'a'));
+                    traverse(crawl.letters[i], pattern, 1, crawl.letters[i].wordEnd, (char) (i + 'a'));
                 }
             }
         } else {
             // else just check the one starts with it
             int idx = c - 'a';
-            traverse(crawl.bois[idx], pattern, 1, crawl.bois[idx].wordEnd, (char) (idx + 'a'));
+            traverse(crawl.letters[idx], pattern, 1, crawl.letters[idx].wordEnd, (char) (idx + 'a'));
         }
 //        System.out.println(map);
         return magicFromStackOverflow();
@@ -100,10 +100,10 @@ public class Trie {
         int uh = 0;
         if (pattern.charAt(level) == '_') {
             // check all
-            for (int i = 0; i < node.bois.length; i++) {
-                if (node.bois[i] != null) {
+            for (int i = 0; i < node.letters.length; i++) {
+                if (node.letters[i] != null) {
 //                    System.out.println("1 char: " + (char)(i+'a') + " in level: " + (level + 1));
-                    uh += traverse(node.bois[i], pattern, level+1, node.bois[i].wordEnd,(char) (i + 'a'));
+                    uh += traverse(node.letters[i], pattern, level+1, node.letters[i].wordEnd,(char) (i + 'a'));
                 }
             }
             if (uh != 0 && letter != pattern.charAt(level-1)) {
@@ -113,12 +113,12 @@ public class Trie {
             }
         } else {
             int idx = pattern.charAt(level) - 'a';
-            if (node.bois[idx] == null) {
+            if (node.letters[idx] == null) {
                 return 0;
             }
 //            System.out.println("2 char: " + (char)(idx+'a') + " in level: " + (level + 1));
 //            addToMap((char) (idx + 'a'));
-            uh += traverse(node.bois[idx], pattern, level+1, node.bois[idx].wordEnd, (char) (idx + 'a'));
+            uh += traverse(node.letters[idx], pattern, level+1, node.letters[idx].wordEnd, (char) (idx + 'a'));
             if (uh != 0 && letter != pattern.charAt(level-1)) {
                 // then there is a success so add it to map
                 addToMap(letter, uh);
@@ -135,15 +135,4 @@ public class Trie {
             map.replace(letter, map.get(letter)+occurrence);
         }
     }
-
-//    public static void main(String[] args) {
-//        Trie t = new Trie();
-//        String word = "and,art,ant,anton,boy,bot,boot,bolt,bald,cut,cute,clean,clear,coat,cold";
-//        for (String s : word.split(",")) {
-//            t.insert(s);
-//        }
-//        String pattern = "c    ";
-//        t.suggest(pattern);
-//        System.out.println(t.map);
-//    }
 }
