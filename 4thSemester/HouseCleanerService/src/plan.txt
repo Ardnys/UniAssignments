@@ -1,4 +1,0 @@
-cleaner class
-homeowner class
-app class
-person class
