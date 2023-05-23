@@ -1,0 +1,20 @@
+John, Smith, john.smith@example.com, p@ssw0rd123, 123-456-7890, New York, CleanCo, Cooking and Dishes, 500, Available on weekdays, 5
+Emma, Johnson, emma.johnson@example.com, securepass789, 987-654-3210, Los Angeles, SparkleClean, Window Cleaning-Cooking and Dishes, 750, Available on Monday Wednesday and Friday, 7
+David, Wilson, david.wilson@example.com, pass123word, 555-123-4567, London, FreshGlow, Cooking and Dishes-Window Cleaning-Loundry and Ironing-Housework, 400, Available on weekdays, 4
+Sophia, Anderson, sophia.anderson@example.com, mypass321, 456-789-0123, Chicago, CleanSweep, Loundry and Ironing-Housework-Window Cleaning, 600, Available on Tuesday and Thursday, 6
+James, Brown, james.brown@example.com, brownie987, 234-567-8901, Sydney, CleanTech, Housework-Loundry and Ironing-Window Cleaning-Cooking and Dishes, 450, Available on weekends, 4
+Olivia, Davis, olivia.davis@example.com, olivpass456, 789-012-3456, Toronto, ClearView, Window Cleaning-Loundry and Ironing, 550, Available on Monday Wednesday and Friday, 5
+Michael, Taylor, michael.taylor@example.com, taylorpass123, 678-901-2345, Berlin, PureClean, Housework-Window Cleaning-Cooking and Dishes-Loundry and Ironing, 700, Available on weekdays, 7
+Isabella, Martinez, isabella.martinez@example.com, bella321pass, 321-654-0987, Madrid, ShineBright, Housework, 500, Available on weekdays, 5
+Benjamin, Lee, benjamin.lee@example.com, leepass123, 901-234-5678, Tokyo, FreshStart, Window Cleaning-Housework-Loundry and Ironing-Cooking and Dishes, 400, Available on Tuesday and Thursday, 4
+Sofia, Perez, sofia.perez@example.com, sofiapass789, 765-432-1098, Paris, CrystalClear, Window Cleaning, 600, Available on weekends, 6
+Andrew, Miller, andrew.miller@example.com, millerpass123, 543-210-9876, Vancouver, EliteClean, Cooking and Dishes-Housework-Loundry and Ironing, 400, Available on weekdays, 4
+Mia, Taylor, mia.taylor@example.com, taylormia987, 876-543-2109, Melbourne, FreshBreeze, Loundry and Ironing-Cooking and Dishes-Window Cleaning, 700, Available on Monday Wednesday and Friday, 7
+Ethan, Hernandez, ethan.hernandez@example.com, ethpass789, 987-654-3210, Barcelona, SpotlessHome, Loundry and Ironing-Cooking and Dishes-Window Cleaning, 500, Available on weekdays, 5
+Ava, Garcia, ava.garcia@example.com, avapass123, 210-987-6543, Rome, GleamingGems, Housework-Window Cleaning, 600, Available on Tuesday and Thursday, 6
+William, Davis, william.davis@example.com, willpass456, 876-543-2109, San Francisco, ShimmerShine, Cooking and Dishes, 400, Available on weekends, 4
+Charlotte, Clark, charlotte.clark@example.com, charclark789, 654-321-0987, Seoul, PureBliss, Cooking and Dishes-Loundry and Ironing-Housework, 700, Available on weekdays, 7
+Daniel, Rodriguez, daniel.rodriguez@example.com, danrod123pass, 432-109-8765, Mexico City, ClearView, Cooking and Dishes-Housework-Window Cleaning-Loundry and Ironing, 500, Available on Monday Wednesday and Friday, 5
+Harper, Walker, harper.walker@example.com, walkerpass321, 543-210-9876, Singapore, SparkleClean, Window Cleaning, 600, Available on weekends, 6
+Emily, Murphy, emily.murphy@example.com, emurph789pass, 654-321-0987, Moscow, CrystalClear, Window Cleaning-Loundry and Ironing, 400, Available on weekdays, 4
+Liam, Wright, liam.wright@example.com, wrightpass123, 876-543-2109, Rio de Janeiro, FreshStart, Cooking and Dishes-Loundry and Ironing-Housework, 700, Available on Tuesday and Thursday, 7
